@@ -1,0 +1,56 @@
+.container {
+  padding: 20px;
+}
+.row {
+  display: flex;
+  margin-bottom: 20px;
+}
+.col-md-4,
+.col-md-8,
+.col-md-6,
+.col-md-12 {
+  flex: 1;
+  padding: 10px;
+}
+.card {
+  padding: 20px;
+  background-color: #4caf50;
+  color: #fff;
+  border-radius: 8px;
+  text-align: center;
+}
+.success {
+  background-color: #4caf50;
+}
+.text-h4 {
+  font-size: 24px;
+  margin: 0;
+}
+.white-text {
+  color: #fff;
+}
+.divider {
+  margin: 10px 0;
+  border-bottom: 1px solid #fff;
+}
+.filters {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.filter {
+  margin-right: 10px;
+}
+.btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.chart-placeholder {
+  height: 200px;
+  background-color: #f0f0f0;
+  border: 1px dashed #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

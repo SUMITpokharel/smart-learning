@@ -1,0 +1,146 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: "Arial", sans-serif;
+  box-sizing: border-box;
+}
+
+/* Landing Page Container */
+.landing-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Hero Section */
+.hero {
+  background: url("C:\Users\NITRO\OneDrive\Desktop\Smart learning\frontend\public\image 71.png")
+    no-repeat center center/cover;
+  color: rgb(255, 255, 255);
+  text-align: center;
+  padding: 100px 20px;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  font-weight: bold;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+}
+
+/* About Section */
+.about {
+  padding: 50px 20px;
+  background-color: #f8f9fa;
+  text-align: center;
+}
+
+.about h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #0a4275;
+}
+
+.about-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.about-content img {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  margin: 10px;
+  border-radius: 8px; /* Adds rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  object-fit: cover; /* Ensures the image looks good */
+}
+
+.about-text {
+  max-width: 400px;
+  text-align: left;
+}
+
+.about-text p {
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.btn-learn-more {
+  background-color: orange;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn-learn-more:hover {
+  background-color: darkorange;
+}
+
+/* Contact Section */
+.contact {
+  padding: 50px 20px;
+  text-align: center;
+}
+
+.contact h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #0a4275;
+}
+
+.contact form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.contact .form-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.contact .form-row input {
+  width: 48%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.contact textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  resize: none;
+  height: 100px;
+}
+
+.btn-submit {
+  background-color: orange;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background-color: darkorange;
+}
