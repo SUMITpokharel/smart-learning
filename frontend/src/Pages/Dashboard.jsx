@@ -15,8 +15,6 @@ const Dashboard = () => {
   const [taskVsDoneData, setTaskVsDoneData] = useState([]);
   const [pieChartData, setPieChartData] = useState([]);
   const [pieChartData1, setPieChartData1] = useState([]);
-  // eslint-disable-next-line no-unused-vars
-  const [reminderData, setReminderData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,7 +23,6 @@ const Dashboard = () => {
           "x-access-token": localStorage.getItem("token"),
         },
       });
-
       setReminders(res.data.data.reminders);
       setTasks(res.data.data.tasks);
       setTeachers(res.data.data.teachers);
@@ -41,13 +38,9 @@ const Dashboard = () => {
 
       // Process tasks and reminders data
       const groupedTasks = processTasks(res.data.data.tasks);
-      const groupedReminders = processReminders(res.data.data.reminders);
-
       setTaskData(groupedTasks.taskCountsByMonth);
       setTaskVsDoneData(groupedTasks.taskCountsByMonthAndStatus);
-      setReminderData(groupedReminders.reminderCountsByMonthAndStatus);
     };
-
     fetchData();
   }, []);
 
@@ -73,19 +66,15 @@ const Dashboard = () => {
     };
 
     tasks.sort((a, b) => new Date(a.date) - new Date(b.date));
-
     const groupedTasks = tasks.reduce((acc, task) => {
       const month = formatDate(task.date).split("-")[1];
       const status = task.status;
-
       if (!acc[month]) acc[month] = { tasks: [], count: 0 };
       if (!acc[month][status]) acc[month][status] = { tasks: [], count: 0 };
-
       acc[month][status].tasks.push(task);
       acc[month].tasks.push(task);
       acc[month].count++;
       acc[month][status].count++;
-
       return acc;
     }, {});
 
@@ -113,71 +102,9 @@ const Dashboard = () => {
     return { taskCountsByMonth, taskCountsByMonthAndStatus };
   };
 
-  const processReminders = (reminders) => {
-    const formatDate = (dateStr) => {
-      const date = new Date(dateStr);
-      const month = [
-        "jan",
-        "feb",
-        "mar",
-        "apr",
-        "may",
-        "jun",
-        "jul",
-        "aug",
-        "sep",
-        "oct",
-        "nov",
-        "dec",
-      ][date.getMonth()];
-      const day = date.getDate();
-      return `${day}-${month}`;
-    };
-
-    const groupedReminders = reminders.reduce((acc, reminder) => {
-      const month = formatDate(reminder.date).split("-")[1];
-      const complete = reminder.status;
-
-      if (!acc[month]) acc[month] = {};
-      if (!acc[month]["complete"]) acc[month]["complete"] = [];
-      if (!acc[month]["incomplete"]) acc[month]["incomplete"] = [];
-
-      if (complete === "pending") {
-        acc[month]["complete"].push(reminder);
-      } else {
-        acc[month]["incomplete"].push(reminder);
-      }
-
-      return acc;
-    }, {});
-
-    const reminderCountsByMonthAndStatus = Object.keys(groupedReminders).reduce(
-      (acc, month) => {
-        const completeCount = groupedReminders[month]["complete"]
-          ? groupedReminders[month]["complete"].length
-          : 0;
-        const incompleteCount = groupedReminders[month]["incomplete"]
-          ? groupedReminders[month]["incomplete"].length
-          : 0;
-        const total = completeCount + incompleteCount;
-        acc.push([month, completeCount, incompleteCount, total]);
-        return acc;
-      },
-      []
-    );
-
-    reminderCountsByMonthAndStatus.unshift([
-      "month",
-      "completed",
-      "incomplete",
-      "total",
-    ]);
-
-    return { reminderCountsByMonthAndStatus };
-  };
-
   const getPendingTasksCount = () =>
     tasks.filter((task) => task.status === "pending").length;
+
   const getPendingRemindersCount = () =>
     reminders.filter((reminder) => reminder.status === "pending").length;
 
@@ -185,12 +112,13 @@ const Dashboard = () => {
     const data = { month, categoryId };
     const response = await axios.post(
       "http://localhost:3000/api/task/my-task-filter",
-      data, {
+      data,
+      {
         withCredentials: true,
       }
     );
 
-    const filterdTaskVsComArray = [
+    const filteredTaskVsComArray = [
       [month, "Pending", "Completed", "Incomplete"],
       [
         response.data.category,
@@ -210,7 +138,7 @@ const Dashboard = () => {
       ],
     ];
 
-    setTaskVsDoneData(filterdTaskVsComArray);
+    setTaskVsDoneData(filteredTaskVsComArray);
     setTaskData(filterCount);
 
     const chartData = [
@@ -219,22 +147,23 @@ const Dashboard = () => {
       ["Completed", response.data.completed],
       ["Incomplete", response.data.incomplete],
     ];
-
     setPieChartData(chartData);
   };
 
-  // eslint-disable-next-line no-unused-vars
   const handleFilterByMonth = async () => {
     const data = { month };
     const filteredTask = await axios.post(
       "http://localhost:3000/api/task/my-task-filter-monthly",
-      data, {
+      data,
+      {
         withCredentials: true,
       }
     );
+
     const filteredTask1 = await axios.post(
       "http://localhost:3000/api/task/my-task-filter-monthly-category",
-      data, {
+      data,
+      {
         withCredentials: true,
       }
     );
@@ -245,7 +174,6 @@ const Dashboard = () => {
       ["Completed", filteredTask.data.completed],
       ["Incomplete", filteredTask.data.incomplete],
     ];
-
     setPieChartData(chartData);
 
     const categoriesData = filteredTask1.data.categoriesData.map(
@@ -256,29 +184,17 @@ const Dashboard = () => {
         return [categoryName, categoryData.count];
       }
     );
-
     const chartData1 = [["Category", "Task Count"], ...categoriesData];
     setPieChartData1(chartData1);
-  };
-
-  
-  // eslint-disable-next-line no-unused-vars
-  const handleFilterByCategory = async () => {
-    const data = { categoryId };
-    const response = await axios.post(
-      "http://localhost:3000/api/task/my-task-filter-category",
-      data, {
-        withCredentials: true,
-      }
-    );
-    console.log(response);
   };
 
   return (
     <Container>
       <Row>
         <Col md={4}>
-          <Row>
+          <Row className="g-3">
+            {" "}
+            {/* Add horizontal spacing */}
             <Col md={6}>
               <Card
                 className="text-center text-white p-3"
@@ -312,11 +228,9 @@ const Dashboard = () => {
                 style={{ backgroundColor: "#003366" }}
               >
                 <p className="h4 mb-0">{getPendingRemindersCount()}</p>
-                <span>Reminder</span>
+                <span>Pending Reminder</span>
               </Card>
             </Col>
-          </Row>
-          <Row>
             <Col md={6}>
               <Card
                 className="text-center text-white p-3"
@@ -392,21 +306,31 @@ const Dashboard = () => {
             <Col md={12}>
               <Card className="p-3">
                 <p className="h6 text-success">Task Performance</p>
-                <span className="text-muted"color="primary">
+                <span className="text-muted">
                   Below you can find the task that you have added in each month
                 </span>
                 <Chart
                   chartType="ColumnChart"
                   data={taskData}
                   options={{
+                    title: "Task Performance by Month",
                     chartArea: {
-                      left: 0,
-                      top: 0,
-                      width: "100%",
-                      height: "100%",
+                      left: "10%",
+                      top: "10%",
+                      width: "80%",
+                      height: "80%",
                     },
                     height: 500,
                     width: "100%",
+                    legend: { position: "top", alignment: "center" },
+                    hAxis: {
+                      title: "Month",
+                      slantedText: true,
+                      slantedTextAngle: 45,
+                    },
+                    vAxis: {
+                      title: "Number of Tasks",
+                    },
                   }}
                 />
               </Card>
@@ -414,7 +338,7 @@ const Dashboard = () => {
             <Col md={12}>
               <Card className="p-3">
                 <p className="h6 text-success">Task Vs Completed</p>
-                <span className="text-muted"color="primary">
+                <span className="text-muted">
                   You can see the total activity you have listed vs the
                   completed graph
                 </span>
@@ -422,14 +346,22 @@ const Dashboard = () => {
                   chartType="BarChart"
                   data={taskVsDoneData}
                   options={{
+                    title: "Task Status Comparison",
                     chartArea: {
-                      left: 0,
-                      top: 0,
-                      width: "100%",
-                      height: "100%",
+                      left: "10%",
+                      top: "10%",
+                      width: "80%",
+                      height: "80%",
                     },
                     height: 500,
                     width: "100%",
+                    legend: { position: "right", alignment: "center" },
+                    hAxis: {
+                      title: "Number of Tasks",
+                    },
+                    vAxis: {
+                      title: "Month",
+                    },
                   }}
                 />
               </Card>
@@ -439,41 +371,35 @@ const Dashboard = () => {
             <Col md={12}>
               <Card className="p-3">
                 <p className="h6 text-success">Your Task</p>
-                <span className="text-muted"color="primary">
+                <span className="text-muted">
                   You can see the data by your filter
                 </span>
                 <Chart
                   chartType="PieChart"
                   data={pieChartData}
                   options={{
-                    chartArea: {
-                      left: 0,
-                      top: 0,
-                      width: "100%",
-                      height: "100%",
-                    },
+                    title: "Task Distribution",
+                    pieHole: 0.4,
                     height: 400,
                     width: "100%",
+                    legend: { position: "right", alignment: "center" },
                   }}
                 />
               </Card>
               <Card className="p-3">
                 <p className="h6 text-success">Task of ({month})</p>
-                <span className="text-muted"color="primary">
+                <span className="text-muted">
                   You can see the data by your filter
                 </span>
                 <Chart
                   chartType="PieChart"
                   data={pieChartData1}
                   options={{
-                    chartArea: {
-                      left: 0,
-                      top: 0,
-                      width: "100%",
-                      height: "100%",
-                    },
+                    title: `Task Distribution for ${month}`,
+                    pieHole: 0.4,
                     height: 400,
                     width: "100%",
+                    legend: { position: "right", alignment: "center" },
                   }}
                 />
               </Card>

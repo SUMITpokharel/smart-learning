@@ -42,7 +42,7 @@ const UserNavbar = () => {
     { text: "Reminder", route: "/user/reminder" },
     { text: "Category", route: "/user/view-category" },
     { text: "Share File", route: "/user/share-file" },
-    {text:"Chat",route:"chat"},
+    { text: "Chat", route: "/chat" },
   ];
 
   return (

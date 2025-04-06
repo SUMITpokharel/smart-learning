@@ -18,13 +18,12 @@ function scheduleEmail(email, date, time, title, description, res) {
 }
 async function sendEmail(email, title, description, res) {
   const mailOptions = {
-    from: "Easy Learning <np05cp4s210115@iic.edu.np>",
+    from: "Smart Learning <sumitpokhrel908@gmail.com>",
     to: email,
     subject: `Reminder for ${title}`,
     text: description,
   };
   let googleRes = await transporter.sendMail(mailOptions);
- 
 }
 exports.createReminder = async (req, res) => {
   try {
@@ -274,7 +273,6 @@ exports.updateReminder = async (req, res) => {
     });
   }
 };
-
 
 exports.getReminderForAdmin = async (req, res) => {
   try {

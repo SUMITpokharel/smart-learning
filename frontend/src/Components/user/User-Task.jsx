@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 import {
@@ -27,11 +27,10 @@ const TaskManager = () => {
   const [name, setName] = useState("");
   const [date, setDate] = useState(new Date().toISOString().substr(0, 10));
   const [time, setTime] = useState("");
-  const [description, setDescription] = useState("");
+  const [description] = useState("");
   const [setOpenEditDialog] = useState(false);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const quillRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,10 +97,10 @@ const TaskManager = () => {
       <Grid container spacing={4}>
         <Grid item md={6}>
           <Card sx={{ p: 4 }}>
-            <Typography variant="h6" color="success.main">
+            <Typography variant="h6" color="blue">
               Add Your Task
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="blue">
               Please add the task to execute it
             </Typography>
             <Divider sx={{ my: 2 }} />
@@ -149,6 +148,7 @@ const TaskManager = () => {
               color="success"
               sx={{ mt: 2 }}
               onClick={createTask}
+              style={{ backgroundColor: "#003366" }}
             >
               Submit
             </Button>
@@ -157,10 +157,10 @@ const TaskManager = () => {
 
         <Grid item md={6}>
           <Card sx={{ p: 4 }}>
-            <Typography variant="h6" color="success.main">
+            <Typography variant="h6" color="blue">
               Task List
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="blue">
               Please mark as complete if done
             </Typography>
             <Divider sx={{ my: 2 }} />

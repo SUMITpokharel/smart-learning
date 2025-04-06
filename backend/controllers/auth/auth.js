@@ -170,31 +170,41 @@ exports.deleteUser = async (req, res, next) => {
   });
 };
 
-exports.updatePassword = async (req, res, next) => {
-  const id = req.params.id;
-  const email = req.body.email;
-  const name = req.body.name;
-  let password;
-  if (req.body.password !== "") {
-    password = bcrypt.hashSync(req.body.password, 8);
-  }
 
-  let imagePath;
-  if (req.file) {
-    // If an image was uploaded, set the imagePath variable
-    imagePath = req.file.filename;
-  }
+exports.updatePassword = async (req, res) => {
+  try {
+    const email = req.body.email;
+    const name = req.body.name;
+    let password = null;
 
-  let updateFields = { password, name };
-  if (imagePath) {
-    updateFields.image = `http://localhost:3000/${imagePath}`;
-  }
+    // Hash the password only if it's provided and not empty
+    if (req.body.password && req.body.password.trim() !== "") {
+      password = bcrypt.hashSync(req.body.password, 8);
+    }
 
-  const user = await User.update(updateFields, { where: { email } });
-  res.status(200).send({
-    message: "success",
-    user,
-  });
+    // Dynamically construct the updateFields object
+    const updateFields = {};
+    if (name) updateFields.name = name;
+    if (password !== null) updateFields.password = password;
+
+    // Handle image upload
+    if (req.file) {
+      const imagePath = `http://localhost:3000/${req.file.filename}`;
+      updateFields.image = imagePath;
+    }
+
+    // Update the user record
+    const [updatedRows] = await User.update(updateFields, { where: { email } });
+
+    if (updatedRows === 0) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    res.status(200).send({ message: "Profile updated successfully" });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).send({ message: "Internal server error", error: error.message });
+  }
 };
 
 exports.updateProfile = async (req, res) => {

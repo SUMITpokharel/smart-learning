@@ -4,7 +4,7 @@ const Sequelize = require("sequelize");
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
   dialect: dbConfig.dialect,
-  
+
   logging: false,
   pool: {
     max: dbConfig.pool.max,
@@ -33,6 +33,7 @@ db.NotesCategory = require("./../model/notesCategoryModel")(
 );
 
 db.ShareFile = require("./../model/sharefile")(sequelize, Sequelize);
+db.Chat = require("./../model/chatModel")(sequelize, Sequelize);
 
 db.Users.hasMany(db.Notes);
 db.Notes.belongsTo(db.Users);
@@ -63,5 +64,7 @@ db.NotesCategory.belongsTo(db.Users);
 
 db.Users.hasMany(db.ShareFile);
 db.ShareFile.belongsTo(db.Users);
+db.Users.hasMany(db.Chat, { foreignKey: "userId" });
+db.Chat.belongsTo(db.Users, { foreignKey: "userId" });
 
 module.exports = db;
