@@ -38,9 +38,8 @@ import Chat from "./Components/user/chat";
 import AdminLayout from "./Components/admin/AdminLayout";
 import AdminHome from "./Components/admin/Admin-Home";
 import AdminUpdateProfile from "./Components/admin/Admin-Profile";
-import MassNotification from "./Components/admin/Admin-notification";
-import RecentUsers from "./Components/admin/All-Users";
 
+import RecentUsers from "./Components/admin/All-Users";
 
 const App = () => {
   const location = useLocation();
@@ -95,7 +94,6 @@ const App = () => {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminHome />} />
             <Route path="userlist" element={<RecentUsers />} />
-            <Route path="notification" element={<MassNotification />} />
             <Route path="profile" element={<AdminUpdateProfile />} />
           </Route>
         </Routes>
