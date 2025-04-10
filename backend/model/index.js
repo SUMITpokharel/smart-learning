@@ -64,6 +64,7 @@ db.NotesCategory.belongsTo(db.Users);
 
 db.Users.hasMany(db.ShareFile);
 db.ShareFile.belongsTo(db.Users);
+
 db.Users.hasMany(db.Chat, { foreignKey: "userId" });
 db.Chat.belongsTo(db.Users, { foreignKey: "userId" });
 
