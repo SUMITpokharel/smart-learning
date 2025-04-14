@@ -68,23 +68,23 @@ const CategoryList = () => {
 
   const editCategory = async (id, type) => {
     setShowModal(true);
-  
+
     const url =
       type === "notes"
         ? `http://localhost:3000/api/category/notesCategories/${id}`
         : `http://localhost:3000/api/category/${id}`;
-  
+
     try {
       const response = await axios.get(url, { withCredentials: true });
-  
+
       console.log("API Response:", response.data); // Log full response
-  
+
       if (!response.data || !response.data.data) {
         console.error("Invalid response data:", response.data);
         alert("Error fetching category data.");
         return;
       }
-  
+
       setEditName(response.data.data.name);
       setCategoryID(id);
     } catch (error) {
@@ -92,7 +92,6 @@ const CategoryList = () => {
       alert("Failed to fetch category data. Please try again.");
     }
   };
-  
 
   const handleEditCategory = async () => {
     await axios.patch(

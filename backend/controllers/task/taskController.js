@@ -43,11 +43,9 @@ exports.getTasks = async (req, res) => {
     const tasks = await Tasks.findAll({
       where: {
         userId: req.userId,
-        status: "pending",
       },
     });
-    console.log("heer");
-    console.log(tasks);
+
     res.status(200).json({
       status: "success",
       message: "Tasks Found",
@@ -117,20 +115,10 @@ exports.updateTask = async (req, res) => {
 exports.completeTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const task = await Tasks.update(
-      {
-        status: "completed",
-      },
-      {
-        where: {
-          id,
-        },
-      }
-    );
+    await Tasks.update({ status: "completed" }, { where: { id } });
     res.status(200).json({
       status: "success",
       message: "Task Completed",
-      data: task,
     });
   } catch (error) {
     res.status(500).json({
@@ -141,22 +129,11 @@ exports.completeTask = async (req, res) => {
 };
 exports.incompleteTask = async (req, res) => {
   try {
-    console.log(req.params.id);
     const { id } = req.params;
-    const task = await Tasks.update(
-      {
-        status: "incomplete",
-      },
-      {
-        where: {
-          id,
-        },
-      }
-    );
+    await Tasks.update({ status: "incomplete" }, { where: { id } });
     res.status(200).json({
       status: "success",
-      message: "Task Incomplete",
-      data: task,
+      message: "Task Marked as Incomplete",
     });
   } catch (error) {
     res.status(500).json({
@@ -167,13 +144,13 @@ exports.incompleteTask = async (req, res) => {
 };
 
 exports.getIndividualTask = async (req, res) => {
-  const { id } = req.params;
   try {
-    const task = await Tasks.findOne({
-      where: {
-        id,
-      },
-    });
+    const { id } = req.params;
+    const task = await Tasks.findByPk(id);
+    if (!task)
+      return res
+        .status(404)
+        .json({ status: "error", message: "Task not found" });
     res.status(200).json({
       status: "success",
       message: "Task Found",

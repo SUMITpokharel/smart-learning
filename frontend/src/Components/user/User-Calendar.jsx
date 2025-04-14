@@ -7,18 +7,16 @@ import {
   Toolbar,
   Typography,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   Slide,
-  IconButton,
+
   Box,
 } from "@mui/material";
 import {
   ChevronLeft,
   ChevronRight,
   ExpandMore,
-  Close,
 } from "@mui/icons-material";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -146,46 +144,36 @@ const CalendarComponent = () => {
           },
         }}
       >
-        <DialogTitle
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            borderBottom: "1px solid #e0e0e0",
-            padding: "16px 24px",
-          }}
-        >
-          <Typography variant="h6">{selectedEvent?.title}</Typography>
-          <IconButton
-            aria-label="close"
-            onClick={handleCloseDialog}
-            sx={{
-              color: (theme) => theme.palette.grey[500],
-            }}
+        <Box sx={{ backgroundColor: "#1976d2", padding: "16px" }}>
+          <Typography
+            variant="h6"
+            color="white"
+            sx={{ fontWeight: 600, fontSize: "1.2rem" }}
           >
-            <Close />
-          </IconButton>
-        </DialogTitle>
+            {selectedEvent?.title}
+          </Typography>
+        </Box>
         <DialogContent
           sx={{
             padding: "24px",
+            "& pre": {
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+            },
           }}
         >
-          <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
-            {selectedEvent?.description}
-          </Typography>
+          <Typography variant="body1">{selectedEvent?.description}</Typography>
         </DialogContent>
         <DialogActions
           sx={{
             borderTop: "1px solid #e0e0e0",
             padding: "16px 24px",
+            justifyContent: "flex-end",
           }}
         >
           <Button onClick={handleCloseDialog} color="primary">
-            Close
+            Cancel
           </Button>
-          {/* Optional: Add more actions like Edit or Delete */}
-          {/* <Button color="secondary">Edit</Button> */}
         </DialogActions>
       </Dialog>
     </Container>

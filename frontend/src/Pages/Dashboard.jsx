@@ -14,7 +14,7 @@ const Dashboard = () => {
   const [taskData, setTaskData] = useState([]);
   const [taskVsDoneData, setTaskVsDoneData] = useState([]);
   const [pieChartData, setPieChartData] = useState([]);
-  const [pieChartData1, setPieChartData1] = useState([]);
+  const [setPieChartData1] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,7 +27,6 @@ const Dashboard = () => {
       setTasks(res.data.data.tasks);
       setTeachers(res.data.data.teachers);
       setNotes(res.data.data.notes);
-
       const categoriesData = await axios.get(
         "http://localhost:3000/api/category",
         {
@@ -35,7 +34,6 @@ const Dashboard = () => {
         }
       );
       setTaskCategories(categoriesData.data.data);
-
       // Process tasks and reminders data
       const groupedTasks = processTasks(res.data.data.tasks);
       setTaskData(groupedTasks.taskCountsByMonth);
@@ -61,13 +59,11 @@ const Dashboard = () => {
         "nov",
         "dec",
       ][date.getMonth()];
-      const day = date.getDate();
-      return `${day}-${month}`;
+      return month; // Return only the month for grouping
     };
-
     tasks.sort((a, b) => new Date(a.date) - new Date(b.date));
     const groupedTasks = tasks.reduce((acc, task) => {
-      const month = formatDate(task.date).split("-")[1];
+      const month = formatDate(task.date);
       const status = task.status;
       if (!acc[month]) acc[month] = { tasks: [], count: 0 };
       if (!acc[month][status]) acc[month][status] = { tasks: [], count: 0 };
@@ -77,13 +73,11 @@ const Dashboard = () => {
       acc[month][status].count++;
       return acc;
     }, {});
-
     const taskCountsByMonth = Object.keys(groupedTasks).map((month) => [
       month,
       groupedTasks[month].count,
     ]);
     taskCountsByMonth.unshift(["month", "tasks"]);
-
     const taskCountsByMonthAndStatus = Object.keys(groupedTasks).reduce(
       (acc, month) => {
         const completedCount = groupedTasks[month].completed
@@ -98,7 +92,6 @@ const Dashboard = () => {
       []
     );
     taskCountsByMonthAndStatus.unshift(["month", "completed", "pending"]);
-
     return { taskCountsByMonth, taskCountsByMonthAndStatus };
   };
 
@@ -109,47 +102,56 @@ const Dashboard = () => {
     reminders.filter((reminder) => reminder.status === "pending").length;
 
   const handleSearchTask = async () => {
-    const data = { month, categoryId };
-    const response = await axios.post(
-      "http://localhost:3000/api/task/my-task-filter",
-      data,
-      {
-        withCredentials: true,
-      }
-    );
+    // Validation: Check if both month and categoryId are provided
+    if (!month || !categoryId) {
+      alert("Please select both a month and a category to proceed.");
+      return; // Stop further execution if validation fails
+    }
 
-    const filteredTaskVsComArray = [
-      [month, "Pending", "Completed", "Incomplete"],
-      [
-        response.data.category,
-        response.data.pending,
-        response.data.completed,
-        response.data.incomplete,
-      ],
-    ];
+    try {
+      const data = { month, categoryId };
+      const response = await axios.post(
+        "http://localhost:3000/api/task/my-task-filter",
+        data,
+        {
+          withCredentials: true,
+        }
+      );
 
-    const filterCount = [
-      ["Month", "Task"],
-      [
-        month,
-        response.data.pending +
-          response.data.completed +
+      const filteredTaskVsComArray = [
+        [month, "Pending", "Completed", "Incomplete"],
+        [
+          response.data.category,
+          response.data.pending,
+          response.data.completed,
           response.data.incomplete,
-      ],
-    ];
+        ],
+      ];
+      const filterCount = [
+        ["Month", "Task"],
+        [
+          month,
+          response.data.pending +
+            response.data.completed +
+            response.data.incomplete,
+        ],
+      ];
+      setTaskVsDoneData(filteredTaskVsComArray);
+      setTaskData(filterCount);
 
-    setTaskVsDoneData(filteredTaskVsComArray);
-    setTaskData(filterCount);
-
-    const chartData = [
-      ["Month", "Task"],
-      ["Pending", response.data.pending],
-      ["Completed", response.data.completed],
-      ["Incomplete", response.data.incomplete],
-    ];
-    setPieChartData(chartData);
+      const chartData = [
+        ["Month", "Task"],
+        ["Pending", response.data.pending],
+        ["Completed", response.data.completed],
+        ["Incomplete", response.data.incomplete],
+      ];
+      setPieChartData(chartData);
+    } catch (error) {
+      console.error("Error fetching filtered tasks:", error);
+      alert("An error occurred while fetching data. Please try again.");
+    }
   };
-
+  // eslint-disable-next-line no-unused-vars
   const handleFilterByMonth = async () => {
     const data = { month };
     const filteredTask = await axios.post(
@@ -159,7 +161,6 @@ const Dashboard = () => {
         withCredentials: true,
       }
     );
-
     const filteredTask1 = await axios.post(
       "http://localhost:3000/api/task/my-task-filter-monthly-category",
       data,
@@ -167,7 +168,6 @@ const Dashboard = () => {
         withCredentials: true,
       }
     );
-
     const chartData = [
       ["Month", "Task"],
       ["Pending", filteredTask.data.pending],
@@ -175,7 +175,6 @@ const Dashboard = () => {
       ["Incomplete", filteredTask.data.incomplete],
     ];
     setPieChartData(chartData);
-
     const categoriesData = filteredTask1.data.categoriesData.map(
       (categoryData) => {
         const categoryName = taskCategories.find(
@@ -189,12 +188,12 @@ const Dashboard = () => {
   };
 
   return (
-    <Container>
+    <Container className="mt-3">
       <Row>
+        {/* Left Column */}
         <Col md={4}>
           <Row className="g-3">
-            {" "}
-            {/* Add horizontal spacing */}
+            {/* Total Task card */}
             <Col md={6}>
               <Card
                 className="text-center text-white p-3"
@@ -204,6 +203,7 @@ const Dashboard = () => {
                 <span>Total Task</span>
               </Card>
             </Col>
+            {/* Todo Task card */}
             <Col md={6}>
               <Card
                 className="text-center text-white p-3"
@@ -213,6 +213,7 @@ const Dashboard = () => {
                 <span>Todo Task</span>
               </Card>
             </Col>
+            {/* Total Reminder card */}
             <Col md={6}>
               <Card
                 className="text-center text-white p-3"
@@ -222,6 +223,7 @@ const Dashboard = () => {
                 <span>Total Reminder</span>
               </Card>
             </Col>
+            {/* Pending Reminder card */}
             <Col md={6}>
               <Card
                 className="text-center text-white p-3"
@@ -231,6 +233,7 @@ const Dashboard = () => {
                 <span>Pending Reminder</span>
               </Card>
             </Col>
+            {/* Notes card */}
             <Col md={6}>
               <Card
                 className="text-center text-white p-3"
@@ -240,6 +243,7 @@ const Dashboard = () => {
                 <span>Notes</span>
               </Card>
             </Col>
+            {/* Teacher Listed card */}
             <Col md={6}>
               <Card
                 className="text-center text-white p-3"
@@ -251,9 +255,12 @@ const Dashboard = () => {
             </Col>
           </Row>
         </Col>
+
+        {/* Right Column */}
         <Col md={8}>
-          <Row className="ml-5">
-            <Form.Group>
+          <Row className="align-items-center mb-3">
+            {/* Select Month Dropdown */}
+            <Form.Group as={Col} md="4">
               <Form.Control
                 as="select"
                 value={month}
@@ -280,7 +287,9 @@ const Dashboard = () => {
                 ))}
               </Form.Control>
             </Form.Group>
-            <Form.Group className="ml-2">
+
+            {/* Select Category Dropdown */}
+            <Form.Group as={Col} md="4" className="ml-2">
               <Form.Control
                 as="select"
                 value={categoryId}
@@ -294,14 +303,22 @@ const Dashboard = () => {
                 ))}
               </Form.Control>
             </Form.Group>
-            <Button
-              variant="primary"
-              className="ml-2"
-              onClick={handleSearchTask}
+
+            {/* Search Button */}
+            <Col
+              md="4"
+              className="d-flex align-items-center justify-content-end"
             >
-              Search
-            </Button>
+              <Button
+                onClick={handleSearchTask}
+                style={{ backgroundColor: "#003366" }}
+              >
+                Search
+              </Button>
+            </Col>
           </Row>
+
+          {/* Charts Section */}
           <Row>
             <Col md={12}>
               <Card className="p-3">
@@ -379,23 +396,6 @@ const Dashboard = () => {
                   data={pieChartData}
                   options={{
                     title: "Task Distribution",
-                    pieHole: 0.4,
-                    height: 400,
-                    width: "100%",
-                    legend: { position: "right", alignment: "center" },
-                  }}
-                />
-              </Card>
-              <Card className="p-3">
-                <p className="h6 text-success">Task of ({month})</p>
-                <span className="text-muted">
-                  You can see the data by your filter
-                </span>
-                <Chart
-                  chartType="PieChart"
-                  data={pieChartData1}
-                  options={{
-                    title: `Task Distribution for ${month}`,
                     pieHole: 0.4,
                     height: 400,
                     width: "100%",

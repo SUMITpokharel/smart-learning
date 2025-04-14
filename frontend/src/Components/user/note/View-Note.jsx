@@ -38,13 +38,16 @@ const NoteList = () => {
   };
 
   const deleteNote = async (id) => {
+    if (
+      !window.confirm("Are you sure you want to delete this teacher details?")
+    )
+      return;
     await axios.delete(`http://localhost:3000/api/notes/${id}`, {
       withCredentials: true,
     });
+    alert("Deleted Successfully");
     setNotes(notes.filter((note) => note.id !== id));
   };
-
- 
 
   const handleImageClick = (imageUrl) => {
     // Open the image/document in a new tab

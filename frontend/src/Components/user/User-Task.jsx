@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Grid,
@@ -10,43 +8,57 @@ import {
   TextField,
   MenuItem,
   Button,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  IconButton,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
 } from "@mui/material";
-
-import "react-quill/dist/quill.snow.css";
-import { Edit, Check, Close, Visibility } from "@mui/icons-material";
+import { Edit, Check, Close } from "@mui/icons-material";
+import axios from "axios";
 
 const TaskManager = () => {
   const [categories, setCategories] = useState([]);
-  const [tasks, setTasks] = useState([]);
-  const [categoryId, setCategoryId] = useState("");
+  const [activeTasks, setActiveTasks] = useState([]);
+  const [completedTasks, setCompletedTasks] = useState([]);
+  const [incompleteTasks, setIncompleteTasks] = useState([]);
   const [name, setName] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [date, setDate] = useState(new Date().toISOString().substr(0, 10));
   const [time, setTime] = useState("");
-  const [description] = useState("");
-  const [setOpenEditDialog] = useState(false);
-  const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
+  const [description, setDescription] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
+  const [detailsData] = useState({});
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editData, setEditData] = useState({});
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await axios.get(`http://localhost:3000/api/category`, {
-        withCredentials: true,
-      });
-      const responseTask = await axios.get(`http://localhost:3000/api/task`, {
-        withCredentials: true,
-      });
-      setCategories(response.data.data);
-      setTasks(responseTask.data.data);
-    };
     fetchData();
   }, []);
 
-  const createTask = async () => {
+  const fetchData = async () => {
+    const resCat = await axios.get(`http://localhost:3000/api/category`, {
+      withCredentials: true,
+    });
+    const resTask = await axios.get(`http://localhost:3000/api/task`, {
+      withCredentials: true,
+    });
+
+    const tasks = resTask.data.data;
+    setActiveTasks(tasks.filter((t) => t.status === "pending"));
+    setCompletedTasks(tasks.filter((t) => t.status === "completed"));
+    setIncompleteTasks(tasks.filter((t) => t.status === "incomplete"));
+
+    setCategories(resCat.data.data);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     await axios.post(
       `http://localhost:3000/api/task`,
       {
@@ -58,164 +70,273 @@ const TaskManager = () => {
       },
       { withCredentials: true }
     );
-    refreshTasks();
+    fetchData();
+    setName("");
+    setCategoryId("");
+    setTime("");
+    setDescription("");
   };
 
-  const refreshTasks = async () => {
-    const responseTask = await axios.get(`http://localhost:3000/api/task`, {
+  const completeTask = async (id) => {
+    await axios.get(`http://localhost:3000/api/task/completeTask/${id}`, {
       withCredentials: true,
     });
-    setTasks(responseTask.data.data);
+    fetchData();
   };
 
-  const handleCompleteTask = async (taskId) => {
-    await axios.get(`http://localhost:3000/api/task/completeTask/${taskId}`, {
+  const markIncompleteTask = async (id) => {
+    await axios.get(`http://localhost:3000/api/task/incompleteTask/${id}`, {
       withCredentials: true,
     });
-    refreshTasks();
+    fetchData();
   };
 
-  const handleIncompleteTask = async (taskId) => {
-    await axios.get(`http://localhost:3000/api/task/incompleteTask/${taskId}`, {
+  const editReminder = async (id) => {
+    const res = await axios.get(`http://localhost:3000/api/task/${id}`, {
       withCredentials: true,
     });
-    refreshTasks();
+    setEditData({ ...res.data.data, id });
+    setEditDialogOpen(true);
   };
 
-  const handleShowDetails = (task) => {
-    setSelectedTask(task);
-    setOpenDetailsDialog(true);
-  };
-
-  const handleEditReminder = (task) => {
-    setSelectedTask(task);
-    setOpenEditDialog(true);
+  const handleEditSubmit = async () => {
+    await axios.patch(
+      `http://localhost:3000/api/task/${editData.id}`,
+      {
+        name: editData.title,
+        date: editData.date,
+        time: editData.time,
+      },
+      { withCredentials: true }
+    );
+    fetchData();
+    setEditDialogOpen(false);
   };
 
   return (
-    <Container>
+    <Container sx={{ mt: 4 }}>
       <Grid container spacing={4}>
+        {/* Add Task Form */}
         <Grid item md={6}>
-          <Card sx={{ p: 4 }}>
+          <Card style={{ padding: 20 }}>
             <Typography variant="h6" color="blue">
               Add Your Task
             </Typography>
-            <Typography variant="caption" color="blue">
-              Please add the task to execute it
-            </Typography>
-            <Divider sx={{ my: 2 }} />
-
-            <TextField
-              select
-              fullWidth
-              label="Category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              margin="normal"
-            >
-              {categories.map((cat) => (
-                <MenuItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              fullWidth
-              label="Todo Title"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              type="date"
-              label="Due Date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              type="time"
-              label="Time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              margin="normal"
-            />
-
-            <Button
-              variant="contained"
-              color="success"
-              sx={{ mt: 2 }}
-              onClick={createTask}
-              style={{ backgroundColor: "#003366" }}
-            >
-              Submit
-            </Button>
+            <Divider />
+            <form onSubmit={handleSubmit}>
+              <TextField
+                label="Category"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                select
+                fullWidth
+                required
+                margin="normal"
+              >
+                {categories.map((cat) => (
+                  <MenuItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                label="Todo Title"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                fullWidth
+                required
+                margin="normal"
+              />
+              <TextField
+                label="Date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                margin="normal"
+              />
+              <TextField
+                label="Time"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                margin="normal"
+              />
+              <TextField
+                label="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                fullWidth
+                multiline
+                rows={4}
+                margin="normal"
+              />
+              <Button type="submit" variant="contained" color="primary">
+                Submit
+              </Button>
+            </form>
           </Card>
         </Grid>
 
+        {/* Active Task List */}
         <Grid item md={6}>
-          <Card sx={{ p: 4 }}>
+          <Card style={{ padding: 20 }}>
             <Typography variant="h6" color="blue">
-              Task List
+              Active Task List
             </Typography>
-            <Typography variant="caption" color="blue">
-              Please mark as complete if done
-            </Typography>
-            <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 1 }} />
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Title</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Due Date</TableCell>
+                  <TableCell>Time</TableCell>
+                  <TableCell>Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {activeTasks.map((task) => (
+                  <TableRow key={task.id}>
+                    <TableCell>{task.title}</TableCell>
+                    <TableCell>{task.description}</TableCell>
+                    <TableCell>{task.date}</TableCell>
+                    <TableCell>{task.time}</TableCell>
+                    <TableCell>
+                      <IconButton onClick={() => completeTask(task.id)}>
+                        <Check />
+                      </IconButton>
+                      <IconButton onClick={() => markIncompleteTask(task.id)}>
+                        <Close />
+                      </IconButton>
+                      <IconButton onClick={() => editReminder(task.id)}>
+                        <Edit />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </Grid>
 
-            {tasks.map((task) => (
-              <Grid container key={task.id} spacing={2} alignItems="center">
-                <Grid item xs={4}>
-                  {task.name}
-                </Grid>
-                <Grid item xs={3}>
-                  {task.date}
-                </Grid>
-                <Grid item xs={2}>
-                  {task.time}
-                </Grid>
-                <Grid item xs={3}>
-                  <IconButton
-                    color="warning"
-                    onClick={() => handleEditReminder(task)}
-                  >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    color="success"
-                    onClick={() => handleCompleteTask(task.id)}
-                  >
-                    <Check />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() => handleIncompleteTask(task.id)}
-                  >
-                    <Close />
-                  </IconButton>
-                  <IconButton
-                    color="primary"
-                    onClick={() => handleShowDetails(task)}
-                  >
-                    <Visibility />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            ))}
+        {/* Completed Task List */}
+        <Grid item md={6}>
+          <Card style={{ padding: 20 }}>
+            <Typography variant="h6" color="green">
+              Completed Task List
+            </Typography>
+            <Divider sx={{ my: 1 }} />
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Title</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Due Date</TableCell>
+                  <TableCell>Time</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {completedTasks.map((task) => (
+                  <TableRow key={task.id}>
+                    <TableCell>{task.title}</TableCell>
+                    <TableCell>{task.description}</TableCell>
+                    <TableCell>{task.date}</TableCell>
+                    <TableCell>{task.time}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </Grid>
+
+        {/* Incomplete Task List */}
+        <Grid item md={6}>
+          <Card style={{ padding: 20 }}>
+            <Typography variant="h6" color="orange">
+              Incomplete Task List
+            </Typography>
+            <Divider sx={{ my: 1 }} />
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Title</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Due Date</TableCell>
+                  <TableCell>Time</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {incompleteTasks.map((task) => (
+                  <TableRow key={task.id}>
+                    <TableCell>{task.title}</TableCell>
+                    <TableCell>{task.description}</TableCell>
+                    <TableCell>{task.date}</TableCell>
+                    <TableCell>{task.time}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Card>
         </Grid>
       </Grid>
 
-      <Dialog
-        open={openDetailsDialog}
-        onClose={() => setOpenDetailsDialog(false)}
-      >
-        <DialogTitle>{selectedTask?.name}</DialogTitle>
-        <DialogContent>{selectedTask?.description}</DialogContent>
+      {/* Details Dialog */}
+      <Dialog open={showDetails} onClose={() => setShowDetails(false)}>
+        <DialogTitle>{detailsData.title}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">{detailsData.description}</Typography>
+          <Typography variant="body2">
+            {detailsData.date} at {detailsData.time}
+          </Typography>
+        </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDetailsDialog(false)}>Close</Button>
+          <Button onClick={() => setShowDetails(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+        <DialogTitle>Edit Task</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Title"
+            value={editData.title || ""}
+            onChange={(e) =>
+              setEditData({ ...editData, title: e.target.value })
+            }
+            margin="dense"
+          />
+          <TextField
+            fullWidth
+            label="Date"
+            type="date"
+            value={editData.date || ""}
+            onChange={(e) => setEditData({ ...editData, date: e.target.value })}
+            margin="dense"
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            fullWidth
+            label="Time"
+            type="time"
+            value={editData.time || ""}
+            onChange={(e) => setEditData({ ...editData, time: e.target.value })}
+            margin="dense"
+            InputLabelProps={{ shrink: true }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleEditSubmit}
+            style={{ backgroundColor: "#003366" }}
+          >
+            Submit
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>

@@ -22,10 +22,10 @@ const Breadcrum = ({ linkOne, linkTwo, btnName, btnLink }) => {
             </Typography>
           </Breadcrumbs>
         </Grid>
-        <Grid item md>
-          {/* Spacer */}
-        </Grid>
-        <Grid item md={3}>
+        <Grid item md />
+        <Grid item md={3} sx={{ mt: 2 }}>
+          {" "}
+          {/* Add top margin here */}
           <Button
             component={Link}
             to={btnLink}

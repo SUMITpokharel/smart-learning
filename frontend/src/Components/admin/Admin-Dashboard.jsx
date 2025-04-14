@@ -117,33 +117,7 @@ const AdminSidebar = () => {
         </List>
 
         {/* Logout Button (Fixed at Bottom) */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            width: "100%",
-            borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-          }}
-        >
-          <ListItem
-            button
-            onClick={handleLogout}
-            sx={{
-              justifyContent: drawerOpen ? "flex-start" : "center",
-              px: drawerOpen ? 2 : 1,
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 3 : 0 }}>
-              <ExitToAppIcon sx={{ color: "black" }} />
-            </ListItemIcon>
-            {drawerOpen && (
-              <ListItemText
-                primary="LogOut"
-                sx={{ textAlign: "center", fontWeight: "bold", color: "black" }}
-              />
-            )}
-          </ListItem>
-        </Box>
+        
       </Drawer>
 
       {/* App Bar */}
@@ -159,9 +133,24 @@ const AdminSidebar = () => {
           >
             <Menu />
           </IconButton>
-          <Typography variant="h6" noWrap>
+          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             Smart Learning
           </Typography>
+          {/* Logout Button in the Top-Right Corner */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              cursor: "pointer",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: 2,
+            }}
+            onClick={handleLogout}
+          >
+            <ExitToAppIcon sx={{ marginRight: 1 }} />
+            <Typography variant="button">LOGOUT</Typography>
+          </Box>
         </Toolbar>
       </AppBar>
     </div>

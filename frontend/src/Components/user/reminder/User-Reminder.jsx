@@ -106,10 +106,15 @@ const Reminder = () => {
   };
 
   const deleteReminder = async (id) => {
+    if (
+      !window.confirm("Are you sure you want to delete this teacher details?")
+    )
+      return;
     try {
       await axios.delete(`http://localhost:3000/api/reminder/${id}`, {
         withCredentials: true,
       });
+      alert("Deleted Successfully");
       fetchReminders();
     } catch (error) {
       console.error("Error deleting reminder:", error);
@@ -164,7 +169,6 @@ const Reminder = () => {
 
           <Button
             variant="contained"
-            
             onClick={createReminder}
             style={{ marginTop: "10px", backgroundColor: "#003366" }}
           >
@@ -244,10 +248,8 @@ const Reminder = () => {
             />
             <Button
               variant="contained"
-              
               onClick={updateReminder}
-              style={{ marginTop: "10px" , backgroundColor: "#003366"}}
-              
+              style={{ marginTop: "10px", backgroundColor: "#003366" }}
             >
               Submit
             </Button>

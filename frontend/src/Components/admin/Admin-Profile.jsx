@@ -79,6 +79,7 @@ const AdminUpdateProfile = () => {
               Hello! {name}
             </Typography>
             <Typography variant="caption">{email}</Typography>
+            {/* Name Field */}
             <TextField
               fullWidth
               label="Name"
@@ -86,6 +87,7 @@ const AdminUpdateProfile = () => {
               onChange={(e) => setName(e.target.value)}
               margin="normal"
             />
+            {/* Email Field */}
             <TextField
               fullWidth
               label="Email"
@@ -93,6 +95,7 @@ const AdminUpdateProfile = () => {
               disabled
               margin="normal"
             />
+            {/* Update Password Field */}
             <TextField
               fullWidth
               type="password"
@@ -101,15 +104,34 @@ const AdminUpdateProfile = () => {
               onChange={(e) => setPassword(e.target.value)}
               margin="normal"
             />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImage(e.target.files[0])}
-              style={{ marginTop: 10 }}
-            />
+            {/* File Input Styled as a TextField */}
+            <label
+              htmlFor="file-input"
+              style={{ display: "flex", alignItems: "center" }}
+            >
+              <input
+                id="file-input"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
+                style={{ display: "none" }}
+              />
+              <Button
+                variant="outlined"
+                color="black"
+                component="span"
+                sx={{ marginRight: 1 }}
+              >
+                Choose File
+              </Button>
+              <Typography variant="body2">
+                {image ? image.name : "No file chosen"}
+              </Typography>
+            </label>
+            {/* Update Profile Button */}
             <Button
               variant="contained"
-              color="blue"
+              color="black"
               onClick={submitForm}
               sx={{ marginTop: 2 }}
             >

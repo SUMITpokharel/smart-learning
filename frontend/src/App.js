@@ -8,6 +8,7 @@ import {
 import Cookies from "js-cookie";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+// Components and Pages
 import Navbar from "./Components/Navbar/Navbar";
 import UserNavbar from "./Components/user/Nav-Bar";
 import Footer from "./Pages/Footer";
@@ -34,36 +35,54 @@ import UpdateProfile from "./Components/user/User-Profile";
 import ResetPassword from "./Components/user/ResetPassword";
 import LoginForm from "./Components/user/ForgotPassword";
 import Chat from "./Components/user/chat";
-
+import MassNotification from "./Components/admin/Admin-notification";
 import AdminLayout from "./Components/admin/AdminLayout";
 import AdminHome from "./Components/admin/Admin-Home";
 import AdminUpdateProfile from "./Components/admin/Admin-Profile";
-
 import RecentUsers from "./Components/admin/All-Users";
-
 const App = () => {
   const location = useLocation();
   const token = Cookies.get("token");
 
+  // Check if the current route starts with "/admin" or "/user"
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const isUserRoute = location.pathname.startsWith("/user");
+
+  // Helper function to determine if the footer should be shown
   const hideFooterRoutes = [
     "/login",
     "/registration",
     "/reset-password",
     "/forgot-password",
-    "/user/profile-update",
-    "/user/view-note",
     "/admin",
-    "/admin/userlist",
-    "/admin/notification",
-    "/admin/profile",
+    "/chat", // Added /chat to hide footer
+    "/dashboard", // Added /dashboard to hide footer
   ];
-  const shouldShowFooter = !hideFooterRoutes.includes(location.pathname);
+  const shouldShowFooter =
+    !hideFooterRoutes.includes(location.pathname) && !isUserRoute;
+
+  // Helper function to determine if the navbar should be shown
+  const hideNavbarRoutes = [
+    "/login",
+    "/registration",
+    "/reset-password",
+    "/forgot-password",
+  ];
+  const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
 
   return (
     <div className="App">
-      {token ? <UserNavbar /> : <Navbar />}
+      {/* Conditional Navbar Rendering */}
+      {shouldShowNavbar &&
+        (isAdminRoute ? null : token ? ( // AdminLayout has its own navbar, so no need to render UserNavbar here
+          <UserNavbar />
+        ) : (
+          <Navbar />
+        ))}
+
       <main>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/aboutus" element={<About />} />
@@ -94,10 +113,13 @@ const App = () => {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminHome />} />
             <Route path="userlist" element={<RecentUsers />} />
+            <Route path="notification" element={<MassNotification />} />
             <Route path="profile" element={<AdminUpdateProfile />} />
           </Route>
         </Routes>
       </main>
+
+      {/* Conditional Footer Rendering */}
       {shouldShowFooter && <Footer />}
     </div>
   );

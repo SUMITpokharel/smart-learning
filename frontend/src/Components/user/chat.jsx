@@ -29,15 +29,24 @@ const Chat = () => {
 
     socket.emit("loadMessages");
 
-    socket.on("chatHistory", (data) => setMessages(data));
-    socket.on("receiveMessage", (newMessage) => {
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    const handleChatHistory = (data) => setMessages(data);
+    const handleReceiveMessage = (newMessage) => {
+      setMessages((prev) => [...prev, newMessage]);
       showNotification(newMessage);
-    });
+    };
 
+    // Cleanup existing listeners
+    socket.off("chatHistory", handleChatHistory);
+    socket.off("receiveMessage", handleReceiveMessage);
+
+    // Attach new ones
+    socket.on("chatHistory", handleChatHistory);
+    socket.on("receiveMessage", handleReceiveMessage);
+
+    // Also return cleanup on unmount
     return () => {
-      socket.off("chatHistory");
-      socket.off("receiveMessage");
+      socket.off("chatHistory", handleChatHistory);
+      socket.off("receiveMessage", handleReceiveMessage);
     };
   }, [user]);
 
@@ -64,6 +73,7 @@ const Chat = () => {
       console.error("Error:", error.response?.data);
     }
   };
+
   // Show browser notification
   const showNotification = (msg) => {
     if (Notification.permission === "granted") {
@@ -81,7 +91,7 @@ const Chat = () => {
     }
   }, []);
 
-   return (
+  return (
     <div style={styles.container}>
       <h2 style={styles.header}>Chat</h2>
       {!user ? (
@@ -107,6 +117,10 @@ const Chat = () => {
                 >
                   <strong style={styles.senderName}>{msg.user.name}:</strong>{" "}
                   {msg.message}
+                  <div style={styles.timestamp}>
+                    {new Date(msg.timestamp).toLocaleString()}{" "}
+                    {/* Format the timestamp */}
+                  </div>
                 </div>
               </div>
             ))}
@@ -130,7 +144,6 @@ const Chat = () => {
   );
 };
 
-
 const styles = {
   container: {
     width: "100vw",
@@ -139,19 +152,19 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    padding: "20px",
+    padding: "0px",
     backgroundColor: "#f9f9f9",
   },
   header: {
     textAlign: "center",
     color: "#333",
-    marginBottom: "20px",
+    marginBottom: "5px", // Reduced from 10px to 5px
   },
   chatBox: {
     width: "80%",
     height: "70%",
     overflowY: "auto",
-    padding: "10px",
+    padding: "5px", // Reduced padding for tighter spacing
     backgroundColor: "#fff",
     borderRadius: "8px",
     boxShadow: "inset 0px 0px 5px rgba(0,0,0,0.1)",
@@ -170,12 +183,12 @@ const styles = {
   myMessageContainer: {
     display: "flex",
     justifyContent: "flex-end",
-    marginBottom: "10px",
+    marginBottom: "5px", // Reduced from 10px to 5px
   },
   otherMessageContainer: {
     display: "flex",
     justifyContent: "flex-start",
-    marginBottom: "10px",
+    marginBottom: "5px", // Reduced from 10px to 5px
   },
   myMessageBubble: {
     maxWidth: "75%",
@@ -201,7 +214,7 @@ const styles = {
   inputContainer: {
     display: "flex",
     width: "80%",
-    marginTop: "10px",
+    marginTop: "5px", // Reduced from 10px to 5px
     alignItems: "center",
   },
   input: {
@@ -230,7 +243,11 @@ const styles = {
       backgroundColor: "#0056b3",
     },
   },
+  timestamp: {
+    fontSize: "12px",
+    color: "#888",
+    marginTop: "5px",
+    textAlign: "right",
+  },
 };
-
-
 export default Chat;

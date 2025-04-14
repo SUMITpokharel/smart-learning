@@ -52,9 +52,14 @@ const ViewTeachers = () => {
   };
 
   const deleteTeacher = async (id) => {
+    if (
+      !window.confirm("Are you sure you want to delete this teacher details?")
+    )
+      return;
     await axios.delete(`http://localhost:3000/api/teacher/${id}`, {
       withCredentials: true,
     });
+    alert("Deleted Successfully");
     fetchTeachers();
   };
 
@@ -90,14 +95,16 @@ const ViewTeachers = () => {
   };
 
   return (
-    <Container>
+    <Container sx={{ mt: 3 }}>
+      {" "}
+      {/* Add margin-top to move content below navbar */}
       <Breadcrumb
         linkOne="Dashboard"
         linkTwo="View Teacher"
         btnName="Add Teacher"
         btnLink="/user/add-teacher"
+        style={{ backgroundColor: "#003366" }}
       />
-
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Card sx={{ p: 4 }}>
@@ -106,7 +113,7 @@ const ViewTeachers = () => {
                 Teacher List
               </Typography>
               <Typography variant="caption" color="blue">
-               Teacher details
+                Teacher details
               </Typography>
               <Divider sx={{ my: 2 }} />
             </div>
@@ -145,7 +152,6 @@ const ViewTeachers = () => {
           </Card>
         </Grid>
       </Grid>
-
       <Dialog
         open={showEditModal}
         onClose={() => setShowEditModal(false)}
