@@ -12,7 +12,12 @@ const Login = () => {
   const [loginFailed, setLoginFailed] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Email regex for validation
   const emailRegex = /.+@.+\..+/;
+
+  // State to track field errors
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -21,13 +26,28 @@ const Login = () => {
   }, [navigate]);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      setErrorMessage("All fields are required");
+    // Reset error states
+    setEmailError(false);
+    setPasswordError(false);
+
+    // Validate required fields
+    if (!email) {
+      setEmailError(true);
+      setErrorMessage("Email is required");
       setLoginFailed(true);
       return;
     }
 
+    if (!password) {
+      setPasswordError(true);
+      setErrorMessage("Password is required");
+      setLoginFailed(true);
+      return;
+    }
+
+    // Validate email format
     if (!emailRegex.test(email)) {
+      setEmailError(true);
       setErrorMessage("Invalid email format");
       setLoginFailed(true);
       return;
@@ -75,33 +95,52 @@ const Login = () => {
         Please input the correct credentials to log in.
       </Typography>
 
+      {/* Email Field */}
       <TextField
         label="E-mail"
         fullWidth
         margin="normal"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        error={!!email && !emailRegex.test(email)}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          setEmailError(false); // Reset error when user types
+        }}
+        error={emailError || (!!email && !emailRegex.test(email))}
         helperText={
-          !!email && !emailRegex.test(email) ? "Invalid email format" : ""
+          emailError
+            ? "Email is required"
+            : !!email && !emailRegex.test(email)
+            ? "Invalid email format"
+            : ""
         }
+        required
       />
 
+      {/* Password Field */}
       <TextField
         label="Password"
         type={showPassword ? "text" : "password"}
         fullWidth
         margin="normal"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          setPasswordError(false); // Reset error when user types
+        }}
+        error={passwordError}
+        helperText={passwordError ? "Password is required" : ""}
+        required
       />
+
+      {/* Show/Hide Password Button */}
       <Button
         onClick={() => setShowPassword(!showPassword)}
         style={{ marginBottom: "10px" }}
       >
-        
+        {showPassword ? "Hide Password" : "Show Password"}
       </Button>
 
+      {/* Forgot Password Link */}
       <Typography variant="caption" display="block" gutterBottom>
         Forgot Password?{" "}
         <span
@@ -116,6 +155,7 @@ const Login = () => {
         </span>
       </Typography>
 
+      {/* Login Button */}
       <Button
         variant="contained"
         color="primary"
@@ -130,6 +170,7 @@ const Login = () => {
         Login
       </Button>
 
+      {/* Registration Link */}
       <Typography variant="caption" display="block" gutterBottom>
         Not registered?{" "}
         <span
@@ -144,6 +185,7 @@ const Login = () => {
         </span>
       </Typography>
 
+      {/* Error Snackbar */}
       <Snackbar
         open={loginFailed}
         autoHideDuration={3000}

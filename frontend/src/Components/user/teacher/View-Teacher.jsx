@@ -20,14 +20,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import CancelIcon from "@mui/icons-material/Cancel";
 
-const Breadcrumb = ({ linkOne, linkTwo, btnName, btnLink }) => (
-  <div className="breadcrumb">
-    {/* Add your breadcrumb implementation here */}
-    <Button href={btnLink} variant="contained" color="primary">
-      {btnName}
-    </Button>
-  </div>
-);
+import Breadcrum from "../User-Breadcrum";
 
 const ViewTeachers = () => {
   const [teachers, setTeachers] = useState([]);
@@ -98,12 +91,11 @@ const ViewTeachers = () => {
     <Container sx={{ mt: 3 }}>
       {" "}
       {/* Add margin-top to move content below navbar */}
-      <Breadcrumb
+      <Breadcrum
         linkOne="Dashboard"
         linkTwo="View Teacher"
         btnName="Add Teacher"
         btnLink="/user/add-teacher"
-        style={{ backgroundColor: "#003366" }}
       />
       <Grid container spacing={3}>
         <Grid item xs={12}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import io from "socket.io-client";
 import axios from "axios";
 
@@ -8,6 +8,9 @@ const Chat = () => {
   const [user, setUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+
+  // Reference to the chat box container
+  const chatBoxRef = useRef(null);
 
   useEffect(() => {
     axios
@@ -49,6 +52,13 @@ const Chat = () => {
       socket.off("receiveMessage", handleReceiveMessage);
     };
   }, [user]);
+
+  // Automatically scroll to the bottom of the chat box when messages change
+  useEffect(() => {
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   // Send a message
   const sendMessage = async () => {
@@ -98,7 +108,13 @@ const Chat = () => {
         <p>Loading user...</p>
       ) : (
         <>
-          <div style={styles.chatBox}>
+          <div
+            ref={chatBoxRef}
+            style={{
+              ...styles.chatBox,
+              overflowY: "auto",
+            }}
+          >
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -118,8 +134,7 @@ const Chat = () => {
                   <strong style={styles.senderName}>{msg.user.name}:</strong>{" "}
                   {msg.message}
                   <div style={styles.timestamp}>
-                    {new Date(msg.timestamp).toLocaleString()}{" "}
-                    {/* Format the timestamp */}
+                    {new Date(msg.timestamp).toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -134,7 +149,8 @@ const Chat = () => {
               onKeyPress={(e) => e.key === "Enter" && sendMessage()}
               style={styles.input}
             />
-            <button onClick={sendMessage} style={styles.sendButton}>
+            <button onClick={sendMessage} style={styles.sendButton}
+            >
               Send
             </button>
           </div>
@@ -158,37 +174,26 @@ const styles = {
   header: {
     textAlign: "center",
     color: "#333",
-    marginBottom: "5px", // Reduced from 10px to 5px
+    marginBottom: "5px",
   },
   chatBox: {
     width: "80%",
     height: "70%",
-    overflowY: "auto",
-    padding: "5px", // Reduced padding for tighter spacing
+    padding: "5px",
     backgroundColor: "#fff",
     borderRadius: "8px",
     boxShadow: "inset 0px 0px 5px rgba(0,0,0,0.1)",
-    scrollbarWidth: "thin", // For Firefox
-    "&::-webkit-scrollbar": {
-      width: "6px",
-    },
-    "&::-webkit-scrollbar-thumb": {
-      backgroundColor: "#ccc",
-      borderRadius: "4px",
-    },
-    "&::-webkit-scrollbar-track": {
-      backgroundColor: "#f1f1f1",
-    },
+    scrollbarWidth: "thin",
   },
   myMessageContainer: {
     display: "flex",
     justifyContent: "flex-end",
-    marginBottom: "5px", // Reduced from 10px to 5px
+    marginBottom: "5px",
   },
   otherMessageContainer: {
     display: "flex",
     justifyContent: "flex-start",
-    marginBottom: "5px", // Reduced from 10px to 5px
+    marginBottom: "5px",
   },
   myMessageBubble: {
     maxWidth: "75%",
@@ -214,7 +219,7 @@ const styles = {
   inputContainer: {
     display: "flex",
     width: "80%",
-    marginTop: "5px", // Reduced from 10px to 5px
+    marginTop: "5px",
     alignItems: "center",
   },
   input: {
@@ -225,9 +230,6 @@ const styles = {
     fontSize: "16px",
     outline: "none",
     transition: "border-color 0.3s ease",
-    "&:focus": {
-      borderColor: "#007bff",
-    },
   },
   sendButton: {
     marginLeft: "10px",
@@ -239,9 +241,6 @@ const styles = {
     cursor: "pointer",
     fontSize: "16px",
     transition: "background-color 0.3s ease",
-    "&:hover": {
-      backgroundColor: "#0056b3",
-    },
   },
   timestamp: {
     fontSize: "12px",
@@ -250,4 +249,5 @@ const styles = {
     textAlign: "right",
   },
 };
+
 export default Chat;

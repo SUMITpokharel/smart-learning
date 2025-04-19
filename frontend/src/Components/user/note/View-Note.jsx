@@ -54,6 +54,10 @@ const NoteList = () => {
     window.open(imageUrl, "_blank");
   };
 
+  const editNote = (id) => {
+    window.location.href = `/user/edit-note/${id}`;
+  };
+
   return (
     <div className="container">
       <Breadcrum
@@ -146,7 +150,7 @@ const NoteList = () => {
                       transform: "translateY(-50%)",
                       backgroundColor: "blue",
                     }}
-                    // Add onClick handler for Edit
+                    onClick={() => editNote(note.id)}
                   >
                     Edit
                   </button>

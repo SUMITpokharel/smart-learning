@@ -45,10 +45,10 @@ const AddTeacher = () => {
         btnLink="/user/view-teacher"
       />
       <Card sx={{ p: 3, maxWidth: 500, mx: "auto", mt: 5 }}>
-        <Typography variant="h6" color="success.main">
+        <Typography variant="h6" color="blue">
           Add Teacher Detail
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" color="blue">
           Please fill up the below information to help you contact your teacher.
         </Typography>
         <Divider sx={{ my: 2 }} />
@@ -95,7 +95,7 @@ const AddTeacher = () => {
           />
           <Button
             type="submit"
-            color="success"
+            style={{ backgroundColor: "#003366" }}
             variant="contained"
             sx={{ mt: 2 }}
           >

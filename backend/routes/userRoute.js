@@ -35,6 +35,7 @@ router.post("/sendEmailToUsers", authController.sendEmailToUsers);
 router.get("/delete/:id", authController.deleteUser);
 
 router.route("/getme").get(verifyToken, authController.getMe);
+router.post("/verifyEmail", authController.verifyEmail);
 
 router.patch(
   "/updatePassword",

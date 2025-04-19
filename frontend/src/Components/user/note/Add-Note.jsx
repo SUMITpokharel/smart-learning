@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Editor, EditorState, ContentState, convertFromHTML } from "draft-js";
 import "draft-js/dist/Draft.css";
+import Breadcrum from "../User-Breadcrum"; // Import the Breadcrum component
 
 const AddNote = () => {
   const [name, setName] = useState("");
@@ -9,19 +10,17 @@ const AddNote = () => {
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
-  const [valid] = useState(true);
   const [categories, setCategories] = useState([]);
   const [editorState, setEditorState] = useState(() => {
-    // Initialize editorState based on the description
     if (description) {
-      const blocksFromHTML = convertFromHTML(description); // Convert HTML to DraftJS blocks
+      const blocksFromHTML = convertFromHTML(description);
       const contentState = ContentState.createFromBlockArray(
         blocksFromHTML.contentBlocks,
         blocksFromHTML.entityMap
       );
       return EditorState.createWithContent(contentState);
     }
-    return EditorState.createEmpty(); // Default to empty editor
+    return EditorState.createEmpty();
   });
 
   useEffect(() => {
@@ -42,9 +41,8 @@ const AddNote = () => {
 
   const handleEditorChange = (state) => {
     setEditorState(state);
-    const content = state.getCurrentContent();
-    const html = state.getCurrentContent().getPlainText(); // For plain text
-    setDescription(html); // Update the description state
+    const html = state.getCurrentContent().getPlainText();
+    setDescription(html);
   };
 
   const handleSubmit = async () => {
@@ -80,130 +78,132 @@ const AddNote = () => {
   };
 
   return (
-    <div
-      style={{
-        maxWidth: "600px",
-        margin: "50px auto",
-        padding: "20px",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        backgroundColor: "#fff",
-      }}
-    >
-      <h2
-        style={{
-          textAlign: "center",
-          marginBottom: "20px",
-          color: "#333",
-        }}
-      >
-        Add Your Notes Here
-      </h2>
-      <form
-        onSubmit={(e) => e.preventDefault()}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "15px",
-        }}
-      >
-        {/* Note Title */}
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Note Title"
-          required
-          style={{
-            padding: "10px",
-            fontSize: "16px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        />
+    <div className="container">
+      {/* Breadcrumb */}
+      <Breadcrum
+        linkOne="Dashboard"
+        linkTwo="Notes"
+        btnName="View Notes"
+        btnLink="/user/view-note"
+      />
 
-        {/* Category */}
-        <select
-          value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
-          required
-          style={{
-            padding: "10px",
-            fontSize: "16px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        >
-          <option value="" disabled>
-            Select Category
-          </option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+      {/* Main Form Container with additional spacing */}
+      <div className="row justify-content-center mt-4">
+        {" "}
+        {/* Added mt-5 for top margin */}
+        <div className="col-md-6">
+          <div className="card p-3">
+            <p className="text-success h6 pb-0 mb-3">Add Your Notes Here</p>
+            <hr />
 
-        {/* Subject */}
-        <input
-          type="text"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          placeholder="Subject"
-          required
-          style={{
-            padding: "10px",
-            fontSize: "16px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        />
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="form-group-spacing"
+            >
+              {/* Note Title */}
+              <div className="mb-3">
+                <label htmlFor="name" className="form-label">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  className="form-control"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Note Title"
+                  required
+                />
+              </div>
 
-        {/* Rich Text Editor */}
-        <div
-          style={{
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            padding: "10px",
-            minHeight: "150px",
-          }}
-        >
-          <Editor editorState={editorState} onChange={handleEditorChange} />
+              {/* Category */}
+              <div className="mb-3">
+                <label htmlFor="categoryId" className="form-label">
+                  Category
+                </label>
+                <select
+                  id="categoryId"
+                  className="form-select"
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>
+                    Select Category
+                  </option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Subject */}
+              <div className="mb-3">
+                <label htmlFor="subject" className="form-label">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  id="subject"
+                  className="form-control"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Subject"
+                  required
+                />
+              </div>
+
+              {/* Description (Rich Text Editor) */}
+              <div className="mb-3">
+                <label htmlFor="description" className="form-label">
+                  Description
+                </label>
+                <div
+                  style={{
+                    border: "1px solid #ccc",
+                    borderRadius: "4px",
+                    padding: "10px",
+                    minHeight: "150px",
+                  }}
+                >
+                  <Editor
+                    editorState={editorState}
+                    onChange={handleEditorChange}
+                  />
+                </div>
+              </div>
+
+              {/* File Upload */}
+              <div className="mb-3">
+                <label htmlFor="files" className="form-label">
+                  Upload Files
+                </label>
+                <input
+                  type="file"
+                  id="files"
+                  className="form-control"
+                  multiple
+                  onChange={(e) => setFiles(e.target.files)}
+                  accept="image/*, .pdf, .doc, .docx"
+                  required
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="btn btn-primary mt-3"
+                style={{ backgroundColor: "#003366" }}
+              >
+                Submit
+              </button>
+            </form>
+          </div>
         </div>
-
-        {/* File Upload */}
-        <input
-          type="file"
-          multiple
-          onChange={(e) => setFiles(e.target.files)}
-          accept="image/*, .pdf, .doc, .docx"
-          style={{
-            padding: "10px",
-            fontSize: "16px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        />
-
-        {/* Submit Button */}
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={!valid}
-          style={{
-            padding: "10px",
-            fontSize: "16px",
-            backgroundColor: valid ? "#007bff" : "#ccc",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            cursor: valid ? "pointer" : "not-allowed",
-          }}
-        >
-          Submit
-        </button>
-      </form>
+      </div>
     </div>
   );
 };

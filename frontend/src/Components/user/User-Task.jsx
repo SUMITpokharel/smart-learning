@@ -174,7 +174,7 @@ const TaskManager = () => {
                 rows={4}
                 margin="normal"
               />
-              <Button type="submit" variant="contained" color="primary">
+              <Button type="submit" variant="contained" style={{ backgroundColor: "#003366" }}>
                 Submit
               </Button>
             </form>

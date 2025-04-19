@@ -149,9 +149,7 @@ exports.getAllNotesCategories = async (req, res) => {
   });
 };
 
-exports.getAllTaskCategories = async (req, res) => {
-  
-};
+exports.getAllTaskCategories = async (req, res) => {};
 
 exports.deleteNotesCategory = async (req, res) => {
   try {
@@ -173,15 +171,17 @@ exports.deleteNotesCategory = async (req, res) => {
       message: error.message,
     });
   }
-
-};exports.getNotesByCategoryId = async (req, res) => {
+};
+exports.getNotesByCategoryId = async (req, res) => {
   try {
     const { id } = req.params;
     const category = await NotesCategory.findOne({
       where: { id, userId: req.userId },
     });
     if (!category) {
-      return res.status(404).json({ status: "error", message: "Category not found" });
+      return res
+        .status(404)
+        .json({ status: "error", message: "Category not found" });
     }
     res.status(200).json({
       status: "success",
@@ -189,6 +189,7 @@ exports.deleteNotesCategory = async (req, res) => {
       data: category,
     });
   } catch (error) {
+    console.error("Error fetching notes category:", error);
     res.status(500).json({ status: "error", message: error.message });
   }
 };
@@ -196,7 +197,6 @@ exports.updateNotesCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
-    
     // Find the NotesCategory by id and userId
     const notesCategory = await NotesCategory.findOne({
       where: {
@@ -204,7 +204,6 @@ exports.updateNotesCategory = async (req, res) => {
         userId: req.userId,
       },
     });
-
     // Check if the NotesCategory exists
     if (!notesCategory) {
       return res.status(404).json({
@@ -212,7 +211,6 @@ exports.updateNotesCategory = async (req, res) => {
         message: "Notes Category not found",
       });
     }
-
     // Update the NotesCategory
     const updatedCategory = await NotesCategory.update(
       { name },
@@ -223,7 +221,6 @@ exports.updateNotesCategory = async (req, res) => {
         },
       }
     );
-
     res.status(200).json({
       status: "success",
       message: "Notes Category Updated",
@@ -236,4 +233,3 @@ exports.updateNotesCategory = async (req, res) => {
     });
   }
 };
-

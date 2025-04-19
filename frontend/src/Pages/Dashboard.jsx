@@ -102,9 +102,9 @@ const Dashboard = () => {
     reminders.filter((reminder) => reminder.status === "pending").length;
 
   const handleSearchTask = async () => {
-    // Validation: Check if both month and categoryId are provided
-    if (!month || !categoryId) {
-      alert("Please select both a month and a category to proceed.");
+    // Validation: Check if at least one of month or categoryId is provided
+    if (!month && !categoryId) {
+      alert("Please select both a month and  category to proceed.");
       return; // Stop further execution if validation fails
     }
 
@@ -118,33 +118,37 @@ const Dashboard = () => {
         }
       );
 
+      // Update chart data dynamically based on selected filters
       const filteredTaskVsComArray = [
-        [month, "Pending", "Completed", "Incomplete"],
+        [month || "All Months", "Pending", "Completed", "Incomplete"],
         [
-          response.data.category,
+          response.data.category || "All Categories",
           response.data.pending,
           response.data.completed,
           response.data.incomplete,
         ],
       ];
+
       const filterCount = [
-        ["Month", "Task"],
+        ["Month/Category", "Task"],
         [
-          month,
+          month || response.data.category || "All",
           response.data.pending +
             response.data.completed +
             response.data.incomplete,
         ],
       ];
+
       setTaskVsDoneData(filteredTaskVsComArray);
       setTaskData(filterCount);
 
       const chartData = [
-        ["Month", "Task"],
+        ["Status", "Count"],
         ["Pending", response.data.pending],
         ["Completed", response.data.completed],
         ["Incomplete", response.data.incomplete],
       ];
+
       setPieChartData(chartData);
     } catch (error) {
       console.error("Error fetching filtered tasks:", error);

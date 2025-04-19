@@ -8,88 +8,119 @@ const sendEmail = require("../../services/sendEmail");
 const sendTextEmail = require("../../services/sendTextEmail");
 const { Users, Reminders, Notes } = require("../../model/index");
 
-exports.register = (req, res, next) => {
+exports.register = async (req, res, next) => {
   if (!req.body.role) req.body.role = "user";
   const name = req.body.name || "John ";
-  const imagePath = req.file.filename;
+  const imagePath = req.file
+    ? `http://localhost:3000/${req.file.filename}`
+    : null;
 
   // Validate request
-  if (!req.body.name && !req.body.email && !req.body.password) {
-    res.status(400).send({
-      message: "Content can not be empty!",
+  if (!req.body.name || !req.body.email || !req.body.password) {
+    return res.status(400).send({
+      message: "Name, email, and password are required!",
     });
-    return;
   }
 
-  User.findOrCreate({
-    where: { email: req.body.email },
-    defaults: {
-      name,
+  try {
+    // Check if the user already exists
+    const [user, created] = await User.findOrCreate({
+      where: { email: req.body.email },
+      defaults: {
+        name,
+        email: req.body.email,
+        role: req.body.role,
+        password: bcrypt.hashSync(req.body.password, 8),
+        image: imagePath,
+        isVerified: false, // Set email verification status to false
+      },
+    });
+
+    if (!created) {
+      return res.status(400).send({
+        message: "Email already exists. Please log in.",
+      });
+    }
+
+    // Generate OTP for email verification
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    user.emailVerificationOtp = otp;
+    await user.save();
+
+    // Send OTP to the user's email
+    await sendEmail({
       email: req.body.email,
-      role: req.body.role,
-      password: bcrypt.hashSync(req.body.password, 8),
-      image: `http://localhost:3000/${imagePath}`,
-    },
-  })
-    .then((result) => {
-      res.status(200).send({
-        result,
-        message: "success",
-      });
-    })
-    .catch((err) => {
-      res.status(400).send({
-        err,
-        message: "failed",
-      });
+      subject: "Email Verification OTP",
+      otp: otp,
     });
 
-  //Creating data to database
+    res.status(200).send({
+      message:
+        "Registration successful. Please verify your email using the OTP sent to your email.",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      message: "An error occurred during registration.",
+      error: err.message,
+    });
+  }
 };
-
 exports.login = async (req, res, next) => {
-  //validating the data
-  if (!req.body.email && !req.body.password) {
-    res.status(400).send({
-      message: "Please Check the input field",
-    });
-    return;
-  }
-  //finding the user
-  let login = await User.findOne({ where: { email: req.body.email } });
-
-  //Checking the user
-  if (!login) {
-    return res.send({
-      status: 400,
-      message: "Invalid login Credential id",
+  // Validate the input
+  if (!req.body.email || !req.body.password) {
+    return res.status(400).send({
+      message: "Email and password are required.",
     });
   }
 
-  //password checking
-  if (bcrypt.compareSync(req.body.password, login.password)) {
-    //Setting up sucurity Token
-    var token = jwt.sign({ id: login.id }, process.env.SECRET, {
+  try {
+    const user = await User.findOne({ where: { email: req.body.email } });
+
+    if (!user) {
+      return res.status(404).send({
+        message: "User not found.",
+      });
+    }
+
+    if (!user.isVerified) {
+      return res.status(403).send({
+        message:
+          "Email not verified. Please verify your email before logging in.",
+      });
+    }
+
+    // Check password
+    if (!bcrypt.compareSync(req.body.password, user.password)) {
+      return res.status(400).send({
+        message: "Invalid password.",
+      });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: user.id }, process.env.SECRET, {
       expiresIn: 86400, // 24 hours
     });
 
-    let newData = {
-      id: login.id,
-      name: login.name,
-      role: login.role,
-      email: login.email,
-      image: login.image,
+    const newData = {
+      id: user.id,
+      name: user.name,
+      role: user.role,
+      email: user.email,
+      image: user.image,
       token,
     };
+
     res.cookie("token", token);
     res.status(200).send({
-      message: "success",
+      message: "Login successful.",
       newData,
     });
-  } else {
-    res.send({
-      status: 400,
-      message: "Invalid login Credential password",
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: "An error occurred during login.",
+      error: error.message,
     });
   }
 };
@@ -170,7 +201,6 @@ exports.deleteUser = async (req, res, next) => {
   });
 };
 
-
 exports.updatePassword = async (req, res) => {
   try {
     const email = req.body.email;
@@ -203,7 +233,9 @@ exports.updatePassword = async (req, res) => {
     res.status(200).send({ message: "Profile updated successfully" });
   } catch (error) {
     console.error("Error updating profile:", error);
-    res.status(500).send({ message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .send({ message: "Internal server error", error: error.message });
   }
 };
 
@@ -284,4 +316,44 @@ exports.getMe = async (req, res, next) => {
   res.status(200).send({
     user,
   });
+};
+exports.verifyEmail = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).send({
+        message: "User not found.",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).send({
+        message: "Email is already verified.",
+      });
+    }
+
+    if (user.emailVerificationOtp !== otp) {
+      return res.status(400).send({
+        message: "Invalid OTP.",
+      });
+    }
+
+    // Mark the email as verified
+    user.isVerified = true;
+    user.emailVerificationOtp = null; // Clear the OTP
+    await user.save();
+
+    res.status(200).send({
+      message: "Email verified successfully. You can now log in.",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: "An error occurred while verifying the email.",
+      error: error.message,
+    });
+  }
 };

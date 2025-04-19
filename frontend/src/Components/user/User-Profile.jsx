@@ -43,10 +43,7 @@ const UpdateProfile = () => {
           },
         }
       );
-
-     
-      navigate("/dashboard");
-      window.location.reload();
+      navigate("/login");
     } catch (error) {
       console.error(error);
     }

@@ -1,32 +1,40 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Breadcrum from "./User-Breadcrum";
 
 const FileShareForm = () => {
+  // State variables
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
   const [userId, setUserId] = useState("");
-  const [user, setUser] = useState([]);
+  const [users, setUsers] = useState([]);
 
   // Fetch users when the component mounts
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await axios.get(
-        `http://localhost:3000/api/user/getAllUsers`,
-        {
-          withCredentials: true,
-        }
-      );
-      setUser(response.data.users);
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/user/getAllUsers`,
+          {
+            withCredentials: true,
+          }
+        );
+        setUsers(response.data.users);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
     };
 
     fetchUsers();
   }, []);
 
+  // Handle file change
   const handleFileChange = (e) => {
     setImage(e.target.files[0]);
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -48,7 +56,6 @@ const FileShareForm = () => {
         }
       );
       alert("Successfully Added");
-      // Redirect to another page after success
       window.location.href = "/user/share-file";
     } catch (error) {
       console.error("Error sharing file:", error);
@@ -58,16 +65,30 @@ const FileShareForm = () => {
 
   return (
     <div className="container">
-      <div className="row justify-content-center">
+      {/* Breadcrumb */}
+      <Breadcrum
+        linkOne="Dashboard"
+        linkTwo="Add Sharefile"
+        btnName="View Sharefile"
+        btnLink="/user/share-file"
+      />
+
+      {/* Main Form Container with additional spacing */}
+      <div className="row justify-content-center mt-5">
+        {" "}
+        {/* Added mt-5 for top margin */}
         <div className="col-md-6">
           <div className="card p-3">
-            <p className="text-success h6 pb-0 mb-0" color="blue">
-              Add Share File
-            </p>
+            <p className="text-success h6 pb-0 mb-3">Add Share File</p>
             <hr />
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="name">Title</label>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="form-group-spacing">
+              {/* Title Input */}
+              <div className="mb-3">
+                <label htmlFor="name" className="form-label">
+                  Title
+                </label>
                 <input
                   type="text"
                   id="name"
@@ -79,8 +100,11 @@ const FileShareForm = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="description">Description</label>
+              {/* Description Input */}
+              <div className="mb-3">
+                <label htmlFor="description" className="form-label">
+                  Description
+                </label>
                 <input
                   type="text"
                   id="description"
@@ -92,8 +116,11 @@ const FileShareForm = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="image">Upload your Documents here</label>
+              {/* File Upload Input */}
+              <div className="mb-3">
+                <label htmlFor="image" className="form-label">
+                  Upload your Documents here
+                </label>
                 <input
                   type="file"
                   id="image"
@@ -104,28 +131,32 @@ const FileShareForm = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="userId">Share With</label>
+              {/* User Selection Dropdown */}
+              <div className="mb-3">
+                <label htmlFor="userId" className="form-label">
+                  Share With
+                </label>
                 <select
                   id="userId"
-                  className="form-control"
+                  className="form-select"
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
                   required
                 >
                   <option value="">Select User</option>
-                  {user.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name}
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name}
                     </option>
                   ))}
                 </select>
               </div>
 
+              {/* Submit Button */}
               <button
                 type="submit"
                 className="btn btn-success mt-3"
-                style={{ backgroundColor: "#003366" }}
+                style={{ backgroundColor: "#003366", color: "white" }}
               >
                 Submit
               </button>

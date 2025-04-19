@@ -12,10 +12,10 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   Paper,
+  TableContainer,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -27,14 +27,20 @@ const CategoryList = () => {
   const [showModal, setShowModal] = useState(false);
   const [editName, setEditName] = useState("");
   const [categoryID, setCategoryID] = useState(null);
+  const [categoryType, setCategoryType] = useState(""); // Track category type (task/notes)
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const response = await axios.get(`http://localhost:3000/api/category`, {
-        withCredentials: true,
-      });
-      setCategories(response.data.data);
-      setNotesCategories(response.data.notesCategories);
+      try {
+        const response = await axios.get(`http://localhost:3000/api/category`, {
+          withCredentials: true,
+        });
+        setCategories(response.data.data);
+        setNotesCategories(response.data.notesCategories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        alert("Failed to fetch categories. Please try again.");
+      }
     };
     fetchCategories();
   }, []);
@@ -68,23 +74,19 @@ const CategoryList = () => {
 
   const editCategory = async (id, type) => {
     setShowModal(true);
-
+    setCategoryType(type); // Set category type (task/notes)
     const url =
       type === "notes"
         ? `http://localhost:3000/api/category/notesCategories/${id}`
         : `http://localhost:3000/api/category/${id}`;
-
     try {
       const response = await axios.get(url, { withCredentials: true });
-
       console.log("API Response:", response.data); // Log full response
-
       if (!response.data || !response.data.data) {
         console.error("Invalid response data:", response.data);
         alert("Error fetching category data.");
         return;
       }
-
       setEditName(response.data.data.name);
       setCategoryID(id);
     } catch (error) {
@@ -94,16 +96,29 @@ const CategoryList = () => {
   };
 
   const handleEditCategory = async () => {
-    await axios.patch(
-      `http://localhost:3000/api/category/${categoryID}`,
-      { name: editName },
-      { withCredentials: true, headers: { "Content-Type": "application/json" } }
-    );
-    const response = await axios.get(`http://localhost:3000/api/category`, {
-      withCredentials: true,
-    });
-    setCategories(response.data.data);
-    setShowModal(false);
+    try {
+      const url =
+        categoryType === "notes"
+          ? `http://localhost:3000/api/category/notesCategories/${categoryID}`
+          : `http://localhost:3000/api/category/${categoryID}`;
+      await axios.patch(
+        url,
+        { name: editName },
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      const response = await axios.get(`http://localhost:3000/api/category`, {
+        withCredentials: true,
+      });
+      setCategories(response.data.data);
+      setNotesCategories(response.data.notesCategories);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error updating category:", error);
+      alert("Failed to update category. Please try again.");
+    }
   };
 
   return (
@@ -116,7 +131,6 @@ const CategoryList = () => {
           btnLink="/user/add-category"
         />
       </div>
-
       <Card style={{ padding: "20px" }}>
         <Typography variant="h6" color="blue">
           Category List
@@ -125,7 +139,6 @@ const CategoryList = () => {
           Find all the categories you have posted
         </Typography>
         <Divider style={{ marginBottom: "10px" }} />
-
         {/* Tasks Categories Table */}
         <div>
           <Typography variant="body1" color="blue">
@@ -146,7 +159,7 @@ const CategoryList = () => {
                     <TableCell>
                       <IconButton
                         color="primary"
-                        onClick={() => editCategory(item.id)}
+                        onClick={() => editCategory(item.id, "task")}
                       >
                         <EditIcon />
                       </IconButton>
@@ -163,7 +176,6 @@ const CategoryList = () => {
             </Table>
           </TableContainer>
         </div>
-
         {/* Notes Categories Table */}
         <div style={{ marginTop: "20px" }}>
           <Typography variant="body1" color="blue">
@@ -184,7 +196,7 @@ const CategoryList = () => {
                     <TableCell>
                       <IconButton
                         color="primary"
-                        onClick={() => editCategory(item.id)}
+                        onClick={() => editCategory(item.id, "notes")}
                       >
                         <EditIcon />
                       </IconButton>
@@ -202,7 +214,6 @@ const CategoryList = () => {
           </TableContainer>
         </div>
       </Card>
-
       {/* Edit Category Modal */}
       <Dialog open={showModal} onClose={() => setShowModal(false)}>
         <Card style={{ padding: "20px" }}>

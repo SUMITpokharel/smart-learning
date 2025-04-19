@@ -8,6 +8,7 @@ const {
   getNotesByCategoryId,
   deleteNotesCategory,
   getAllTaskCategories,
+  updateNotesCategory,
 } = require("../controllers/category/categoryController");
 const { verifyToken } = require("../middleware/authJwt");
 
@@ -20,7 +21,7 @@ router.route("/taskCategories").get(verifyToken, getAllTaskCategories);
 router.route("/notesCategories/:id").delete(verifyToken, deleteNotesCategory);
 router.route("/notesCategories/:id").get(verifyToken, getNotesByCategoryId);
 
-
+router.route("/notesCategories/:id").patch(verifyToken, updateNotesCategory);
 
 router
   .route("/")

@@ -29,6 +29,7 @@ import EditShareFile from "./Components/user/Edit-Share-File";
 import NotePage from "./Components/user/note/View-Note";
 import AddNote from "./Components/user/note/Add-Note";
 import NoteDetails from "./Components/user/note/View-Single-Note";
+import EditNote from "./Components/user/note/Edit-Note";
 import Reminder from "./Components/user/reminder/User-Reminder";
 import TaskManager from "./Components/user/User-Task";
 import UpdateProfile from "./Components/user/User-Profile";
@@ -40,6 +41,8 @@ import AdminLayout from "./Components/admin/AdminLayout";
 import AdminHome from "./Components/admin/Admin-Home";
 import AdminUpdateProfile from "./Components/admin/Admin-Profile";
 import RecentUsers from "./Components/admin/All-Users";
+import VerifyEmail from "./Pages/Emailverfication";
+
 const App = () => {
   const location = useLocation();
   const token = Cookies.get("token");
@@ -102,12 +105,14 @@ const App = () => {
           <Route path="/user/edit-share-file/:id" element={<EditShareFile />} />
           <Route path="/user/add-note" element={<AddNote />} />
           <Route path="/user/view-note/:id" element={<NoteDetails />} />
+          <Route path="/user/edit-note/:id" element={<EditNote />} />
           <Route path="/user/Reminder" element={<Reminder />} />
           <Route path="/user/task" element={<TaskManager />} />
           <Route path="/user/profile-update" element={<UpdateProfile />} />
           <Route path="/forgot-password" element={<LoginForm />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>

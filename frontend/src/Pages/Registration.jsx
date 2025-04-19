@@ -32,7 +32,7 @@ const RegistrationForm = () => {
     formData.append("email", data.email);
     formData.append("password", data.password);
     formData.append("image", image);
-
+  
     try {
       const response = await axios.post(
         "http://localhost:3000/api/user/register",
@@ -41,22 +41,14 @@ const RegistrationForm = () => {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-
-      if (response.data.result[1]) {
-        localStorage.setItem("avatar", response.data.result[0].image);
-        localStorage.setItem("name", response.data.result[0].name);
-        localStorage.setItem("email", response.data.result[0].email);
-        alert("Successfully Registered!");
-        navigate("/login");
-      } else {
-        alert("Email already in use");
-      }
+  
+      alert(response.data.message);
+      navigate("/verify-email"); // Redirect to email verification page
     } catch (error) {
       alert("Error while registering");
       console.error(error);
     }
   };
-
   return (
     <Container maxWidth="sm" style={{ marginTop: "20px" }}>
       <Typography variant="h5" color="#c4581a" gutterBottom>

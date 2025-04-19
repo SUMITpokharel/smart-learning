@@ -21,7 +21,8 @@ module.exports = (sequelize, Sequelize) => {
     otp: {
       type: Sequelize.STRING,
       allowNull: true,
-    },
+    }, emailVerificationOtp: { type: Sequelize.STRING, allowNull: true }, // For email verification
+    isVerified: { type: Sequelize.BOOLEAN, defaultValue: false },
   });
   return User;
 };
