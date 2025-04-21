@@ -124,6 +124,7 @@ const FileShareForm = () => {
                 <input
                   type="file"
                   id="image"
+                  multiple
                   className="form-control"
                   onChange={handleFileChange}
                   accept="image/*, .pdf, .doc, .docx"

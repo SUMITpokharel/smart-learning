@@ -1,11 +1,15 @@
 const multer = require("multer");
+const path = require("path");
 
-var storage = multer.diskStorage({
+// Configure storage
+const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./uploads/");
+    cb(null, "./uploads/"); // Ensure the "uploads" directory exists
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
+    // Preserve the original file extension
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
 

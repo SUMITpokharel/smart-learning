@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Breadcrum from "./User-Breadcrum";
 
 import {
   Container,
@@ -15,8 +16,7 @@ import {
   TableRow,
   IconButton,
 } from "@mui/material";
-import { Visibility, Edit, Cancel } from "@mui/icons-material";
-import Breadcrum from "./User-Breadcrum";
+import { Visibility, Edit, Cancel, Download } from "@mui/icons-material";
 
 const ShareFileList = () => {
   const [data, setData] = useState([]);
@@ -42,7 +42,7 @@ const ShareFileList = () => {
   const deleteShareFile = async (id) => {
     if (window.confirm("Are you sure you want to delete this file?")) {
       try {
-        await axios.get(`http://localhost:3000/api/shareFile/delete/${id}`, {
+        await axios.delete(`http://localhost:3000/api/shareFile/delete/${id}`, {
           withCredentials: true,
         });
         alert("Successfully Deleted");
@@ -56,7 +56,9 @@ const ShareFileList = () => {
   const editShareFile = (id) => {
     navigate(`/user/edit-share-file/${id}`);
   };
-
+  const handleDownload = (id, title) => {
+    window.open(`http://localhost:3000/api/shareFile/download/${id}`, "_blank");
+  };
   return (
     <Container>
       <Breadcrum
@@ -65,17 +67,12 @@ const ShareFileList = () => {
         btnName="Add Share File"
         btnLink="/user/add-share-file"
       />
+
       <Card sx={{ padding: 3, marginTop: 2 }}>
         <Typography variant="h6" color="blue">
           Share File List
         </Typography>
-        <Typography variant="caption" color="blue">
-          Find all the categories you have posted
-        </Typography>
         <Divider sx={{ marginY: 2 }} />
-        <Typography variant="body1" color="blue">
-          My Share File
-        </Typography>
         <TableContainer>
           <Table>
             <TableHead>
@@ -114,6 +111,12 @@ const ShareFileList = () => {
                       color="warning"
                     >
                       <Cancel />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleDownload(item.id, item.title)}
+                      color="success"
+                    >
+                      <Download />
                     </IconButton>
                   </TableCell>
                 </TableRow>

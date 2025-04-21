@@ -182,6 +182,7 @@ exports.getNotesByCategoryId = async (req, res) => {
       return res
         .status(404)
         .json({ status: "error", message: "Category not found" });
+        
     }
     res.status(200).json({
       status: "success",

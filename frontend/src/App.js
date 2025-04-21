@@ -59,7 +59,11 @@ const App = () => {
     "/forgot-password",
     "/admin",
     "/chat", // Added /chat to hide footer
-    "/dashboard", // Added /dashboard to hide footer
+    "/dashboard",
+    "/verify-email",
+    "/admin/profile",
+    "/admin/notification",
+    "/admin/userlist", // Added /dashboard to hide footer
   ];
   const shouldShowFooter =
     !hideFooterRoutes.includes(location.pathname) && !isUserRoute;
@@ -70,6 +74,7 @@ const App = () => {
     "/registration",
     "/reset-password",
     "/forgot-password",
+    "/verify-email",
   ];
   const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
 

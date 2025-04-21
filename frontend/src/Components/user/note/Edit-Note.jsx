@@ -108,7 +108,7 @@ const EditNote = () => {
           }}
         >
           <div>
-            <p style={{ color: "green", fontSize: "20px", marginBottom: "0" }}>
+            <p style={{ color: "blue", fontSize: "20px", marginBottom: "0" }}>
               Edit Note
             </p>
             <span style={{ fontSize: "14px", color: "grey" }}>
@@ -219,7 +219,7 @@ const EditNote = () => {
               type="submit"
               disabled={!name || !subject || !description || !categoryId}
               style={{
-                backgroundColor: "green",
+                backgroundColor: "#003366",
                 color: "white",
                 border: "none",
                 padding: "10px 20px",

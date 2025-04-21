@@ -128,7 +128,7 @@ const AddNote = () => {
                   onChange={(e) => setCategoryId(e.target.value)}
                   required
                 >
-                  <option value="" disabled>
+                  <option value="" enabled>
                     Select Category
                   </option>
                   {categories.map((category) => (
