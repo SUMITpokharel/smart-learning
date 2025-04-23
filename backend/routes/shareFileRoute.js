@@ -13,7 +13,7 @@ const { multer, storage } = require("../services/multerConfig");
 const upload = multer({ storage: storage });
 
 router.route("/shareFile").get(verifyToken, geTMyShareFile);
-router.route("/delete/:id").get(verifyToken, deleteFile);
+router.route("/delete/:id").delete(verifyToken, deleteFile);
 router.get("/download/:id", downloadShareFile);
 router.route("/shareFile/:id").get(verifyToken, getFile);
 router

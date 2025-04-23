@@ -79,38 +79,38 @@ exports.deleteFile = async (req, res) => {
     const fileRecord = await ShareFile.findOne({
       where: { id },
     });
-
     if (!fileRecord) {
       return res.status(404).json({ message: "File not found" });
     }
-
+    if (!fileRecord.file) {
+      return res.status(400).json({ message: "File path is missing" });
+    }
     const filePath = path.join(
       __dirname,
       "../../uploads",
       fileRecord.file.split("/").pop()
     );
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath); // Delete the file from the server
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: "File not found on server" });
     }
-
+    fs.unlinkSync(filePath); // Delete the file from the server
     await ShareFile.destroy({
       where: {
         id,
       },
     });
-
     res.status(200).json({
       status: 200,
       message: "Deleted",
     });
   } catch (error) {
+    console.error("Error deleting file:", error);
     res.status(500).json({
       status: "error",
       message: error.message,
     });
   }
 };
-
 exports.getFile = async (req, res) => {
   try {
     const { id } = req.params;

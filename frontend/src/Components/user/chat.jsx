@@ -149,8 +149,7 @@ const Chat = () => {
               onKeyPress={(e) => e.key === "Enter" && sendMessage()}
               style={styles.input}
             />
-            <button onClick={sendMessage} style={styles.sendButton}
-            >
+            <button onClick={sendMessage} style={styles.sendButton}>
               Send
             </button>
           </div>

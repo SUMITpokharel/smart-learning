@@ -7,8 +7,10 @@ const FileShareForm = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
-  const [userId, setUserId] = useState("");
-  const [users, setUsers] = useState([]);
+  const [userId, setUserId] = useState(""); // Selected user ID
+  const [users, setUsers] = useState([]); // All users
+  const [filteredUsers, setFilteredUsers] = useState([]); // Filtered users based on search
+  const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering users
 
   // Fetch users when the component mounts
   useEffect(() => {
@@ -21,11 +23,11 @@ const FileShareForm = () => {
           }
         );
         setUsers(response.data.users);
+        setFilteredUsers(response.data.users); // Initialize filtered users
       } catch (error) {
         console.error("Error fetching users:", error);
       }
     };
-
     fetchUsers();
   }, []);
 
@@ -37,7 +39,6 @@ const FileShareForm = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const formData = new FormData();
     formData.append("name", name);
     formData.append("description", description);
@@ -63,6 +64,18 @@ const FileShareForm = () => {
     }
   };
 
+  // Handle user search
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+
+    // Filter users based on the search term
+    const filtered = users.filter((user) =>
+      user.name.toLowerCase().includes(term)
+    );
+    setFilteredUsers(filtered);
+  };
+
   return (
     <div className="container">
       {/* Breadcrumb */}
@@ -72,16 +85,12 @@ const FileShareForm = () => {
         btnName="View Sharefile"
         btnLink="/user/share-file"
       />
-
       {/* Main Form Container with additional spacing */}
       <div className="row justify-content-center mt-5">
-        {" "}
-        {/* Added mt-5 for top margin */}
         <div className="col-md-6">
           <div className="card p-3">
             <p className="text-success h6 pb-0 mb-3">Add Share File</p>
             <hr />
-
             {/* Form */}
             <form onSubmit={handleSubmit} className="form-group-spacing">
               {/* Title Input */}
@@ -99,7 +108,6 @@ const FileShareForm = () => {
                   required
                 />
               </div>
-
               {/* Description Input */}
               <div className="mb-3">
                 <label htmlFor="description" className="form-label">
@@ -115,7 +123,6 @@ const FileShareForm = () => {
                   required
                 />
               </div>
-
               {/* File Upload Input */}
               <div className="mb-3">
                 <label htmlFor="image" className="form-label">
@@ -131,28 +138,36 @@ const FileShareForm = () => {
                   required
                 />
               </div>
-
-              {/* User Selection Dropdown */}
+              {/* User Search Input */}
               <div className="mb-3">
-                <label htmlFor="userId" className="form-label">
+                <label htmlFor="searchUser" className="form-label">
                   Share With
                 </label>
+                <input
+                  type="text"
+                  id="searchUser"
+                  className="form-control"
+                  placeholder="Search by name"
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  required
+                />
+                {/* Display filtered users as a dropdown */}
                 <select
                   id="userId"
-                  className="form-select"
+                  className="form-select mt-2"
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
                   required
                 >
                   <option value="">Select User</option>
-                  {users.map((user) => (
+                  {filteredUsers.map((user) => (
                     <option key={user.id} value={user.id}>
                       {user.name}
                     </option>
                   ))}
                 </select>
               </div>
-
               {/* Submit Button */}
               <button
                 type="submit"

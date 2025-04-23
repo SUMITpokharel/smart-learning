@@ -13,16 +13,14 @@ import {
   TableCell,
   TableBody,
   IconButton,
+  Alert,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import "react-quill/dist/quill.snow.css";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-// Dynamically import Quill to prevent SSR issues (Next.js)
 
 const Reminder = () => {
   const [date, setDate] = useState(dayjs()); // Use dayjs
@@ -35,6 +33,13 @@ const Reminder = () => {
   const [editDate, setEditDate] = useState(dayjs());
   const [editTime, setEditTime] = useState(dayjs());
   const [openDialog, setOpenDialog] = useState(false);
+
+  // Error states for validation
+  const [errors, setErrors] = useState({
+    name: "",
+    date: "",
+    time: "",
+  });
 
   useEffect(() => {
     fetchReminders();
@@ -51,14 +56,44 @@ const Reminder = () => {
     }
   };
 
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { name: "", date: "", time: "" };
+
+    if (!name.trim()) {
+      newErrors.name = "Reminder Title is required.";
+      isValid = false;
+    }
+
+    if (!date || date.isBefore(dayjs(), "day")) {
+      newErrors.date = "Date cannot be in the past.";
+      isValid = false;
+    }
+
+    if (
+      !time ||
+      dayjs(`${date.format("YYYY-MM-DD")} ${time.format("HH:mm")}`).isBefore(
+        dayjs()
+      )
+    ) {
+      newErrors.time = "Time cannot be in the past.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const createReminder = async () => {
+    if (!validateForm()) return;
+
     try {
       await axios.post(
         "http://localhost:3000/api/reminder",
         {
           title: name,
-          date: date.format("YYYY-MM-DD"), // Ensure format
-          time: time.format("HH:mm"), // Ensure format
+          date: date.format("YYYY-MM-DD"),
+          time: time.format("HH:mm"),
           description,
         },
         { withCredentials: true }
@@ -80,14 +115,27 @@ const Reminder = () => {
       const data = response.data.data;
       setEditId(id);
       setEditName(data.title);
-      setEditDate(dayjs(data.date)); // Ensure dayjs object
-      setEditTime(dayjs(data.time, "HH:mm")); // Ensure time parsing
+      setEditDate(dayjs(data.date));
+      setEditTime(dayjs(data.time, "HH:mm"));
     } catch (error) {
       console.error("Error editing reminder:", error);
     }
   };
 
   const updateReminder = async () => {
+    if (
+      !editName.trim() ||
+      !editDate ||
+      editDate.isBefore(dayjs(), "day") ||
+      !editTime ||
+      dayjs(
+        `${editDate.format("YYYY-MM-DD")} ${editTime.format("HH:mm")}`
+      ).isBefore(dayjs())
+    ) {
+      alert("Please fill all fields correctly.");
+      return;
+    }
+
     try {
       await axios.patch(
         `http://localhost:3000/api/reminder/${editId}`,
@@ -106,10 +154,9 @@ const Reminder = () => {
   };
 
   const deleteReminder = async (id) => {
-    if (
-      !window.confirm("Are you sure you want to delete this teacher details?")
-    )
+    if (!window.confirm("Are you sure you want to delete this reminder?"))
       return;
+
     try {
       await axios.delete(`http://localhost:3000/api/reminder/${id}`, {
         withCredentials: true,
@@ -126,6 +173,7 @@ const Reminder = () => {
     setDate(dayjs());
     setTime(dayjs());
     setDescription("");
+    setErrors({ name: "", date: "", time: "" });
   };
 
   return (
@@ -140,22 +188,32 @@ const Reminder = () => {
             Reminder added here can be seen in the calendar later.
           </Typography>
           <Divider />
+          {errors.name && <Alert severity="error">{errors.name}</Alert>}
           <TextField
             label="Reminder Title"
             value={name}
             onChange={(e) => setName(e.target.value)}
             fullWidth
             margin="normal"
+            error={!!errors.name}
+            helperText={errors.name}
           />
+          {errors.date && <Alert severity="error">{errors.date}</Alert>}
           <DatePicker
             label="Date"
             value={date}
             onChange={(newValue) => setDate(newValue)}
+            minDate={dayjs()}
+            error={!!errors.date}
+            helperText={errors.date}
           />
+          {errors.time && <Alert severity="error">{errors.time}</Alert>}
           <TimePicker
             label="Time"
             value={time}
             onChange={(newValue) => setTime(newValue)}
+            error={!!errors.time}
+            helperText={errors.time}
           />
           <TextField
             label="Reminder Description"
@@ -240,6 +298,7 @@ const Reminder = () => {
               label="Date"
               value={editDate}
               onChange={(newValue) => setEditDate(newValue)}
+              minDate={dayjs()}
             />
             <TimePicker
               label="Time"
